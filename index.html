@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>BLACK SHIELD — Hybrid V5.0.8</title>
+<title>BLACK SHIELD — Hybrid V5.0.9</title>
 <style>
 *{box-sizing:border-box}
 body{margin:0;background:#091322;color:#eaf2ff;font-family:Arial,system-ui,sans-serif}
@@ -40,7 +40,7 @@ button:hover{background:#284a72}
 <body>
 <main class="wrap">
 <h1>BLACK <span style="color:#65e3ad">SHIELD</span></h1>
-<p class="sub">Risk & Lot Size Calculator · Hybrid V5.0.8 · Online + Offline</p>
+<p class="sub">Risk & Lot Size Calculator · Hybrid V5.0.9 · Online + Offline</p>
 
 <aside id="announcement" class="note" hidden role="status" style="margin-bottom:14px"><strong id="announcementTitle"></strong><p id="announcementText" style="white-space:pre-wrap"></p><button id="dismissAnnouncement" type="button">Dismiss</button></aside><div class="actions" style="margin-bottom:14px"><button id="installApp" type="button">Install desktop app</button><button id="miniApp" type="button">Floating calculator</button><button id="fullApp" type="button" hidden>Full dashboard</button></div><aside id="emergencyNotice" class="note" hidden style="border-color:#ff7777" role="alert"><strong>CRITICAL UPDATE REQUIRED</strong><p id="emergencyText"></p><button id="emergencyUpdate" type="button">Check for emergency update</button></aside><section class="panel">
   <div class="grid">
@@ -109,12 +109,27 @@ function applyProfile(force){
   update();
 }
 function readNumber(id){const raw=$(id).value.trim();return raw===''?NaN:Number(raw);}
+function exactLot(balance,risk,contract,unit,min,step,distance){
+ function dec(v){const m=String(v).trim().match(/^(\d*)(?:\.(\d*))?(?:e([+-]?\d+))?$/i);if(!m||!(m[1]||m[2]))throw Error('Invalid decimal');const digits=(m[1]||'')+(m[2]||'');const exp=Number(m[3]||0)-(m[2]||'').length;if(digits.length>40||Math.abs(exp)>100)throw Error('Precision out of range');const n=BigInt(digits);return exp>=0?[n*10n**BigInt(exp),1n]:[n,10n**BigInt(-exp)];}
+ function mul(a,b){return[a[0]*b[0],a[1]*b[1]];}
+ function div(a,b){if(b[0]===0n)throw Error('Zero divisor');return[a[0]*b[1],a[1]*b[0]];}
+ function sub(a,b){return[a[0]*b[1]-b[0]*a[1],a[1]*b[1]];}
+ function str(a){let q=a[0]/a[1],rem=a[0]%a[1],tail='';while(rem&&tail.length<150){rem*=10n;tail+=String(rem/a[1]);rem%=a[1];}if(rem)throw Error('Precision out of range');return String(q)+(tail?'.'+tail:'');}
+ const budget=div(mul(dec(balance),dec(risk)),[100n,1n]), per=mul(mul(dec(contract),dec(unit)),dec(distance)), minimum=dec(min), increment=dec(step);
+ if([budget,per,minimum,increment].some(a=>a[0]<=0n))return null;
+ const room=sub(div(budget,per),minimum);if(room[0]<0n)return null;
+ const k=div(room,increment),n=k[0]/k[1];
+ const lot=[minimum[0]*increment[1]+n*increment[0]*minimum[1],minimum[1]*increment[1]];
+ const loss=mul(lot,per);
+ if(loss[0]*budget[1]>budget[0]*loss[1])throw Error('Risk invariant failed');
+ return {lot:str(lot),loss:str(loss)};
+}
 function update(){
   const b=readNumber('balance'), r=readNumber('risk');
   const c=readNumber('contract'), unitSize=readNumber('pip');
   const min=readNumber('minlot'), step=readNumber('step');
   const p=symbolProfile(), valid=($('symbol').value!=='CUSTOM'||$('customSymbol').value.trim().length>0) && [b,r,c,unitSize,min,step].every(Number.isFinite) &&
-    b>0 && r>0 && r<=100 && c>0 && unitSize>0 && min>0 && step>0;
+    b>0 && r>0 && r<=100 && c>0 && unitSize>0 && min>0 && step>0 && Number.isFinite(b*(r/100)) && b*(r/100)>0;
   const budget=valid?b*(r/100):0;
   $('budget').textContent=valid?money(budget):'—';
   $('activeSettings').textContent='ACTIVE: Minimum Lot = '+$('minlot').value+' | Lot Step = '+$('step').value+' | Contract Size = '+$('contract').value+' | Unit Size = '+$('pip').value;
@@ -125,16 +140,10 @@ function update(){
   }
   let html='<table><thead><tr><th>'+p.unit+'</th><th>Lot size</th><th>Estimated risk</th></tr></thead><tbody>';
   for(let distance=10;distance<=200;distance+=10){
-    const priceDistance=distance*unitSize;
-    const riskPerLot=priceDistance*c;
-    const rawLot=budget/riskPerLot;
-    // Valid volumes are minlot + n * step, where n is a nonnegative integer.
-    const n=Math.floor((rawLot-min)/step+1e-9);
-    const cleanLot=n>=0 ? Number((min+n*step).toPrecision(12)) : 0;
-    const tradable=Number.isFinite(cleanLot) && Number.isFinite(riskPerLot) && n>=0 && cleanLot>=min && cleanLot*riskPerLot<=budget;
-    const finalLot=tradable?cleanLot:0;
-    const loss=finalLot*riskPerLot;
-    html+='<tr><td>'+distance+'</td><td class="'+(!tradable?'bad':'')+'">'+(tradable?fmt(finalLot):'NO TRADE')+'</td><td>'+(tradable?money(loss):'—')+'</td></tr>';
+    let result=null;
+    try{result=exactLot($('balance').value,$('risk').value,$('contract').value,$('pip').value,$('minlot').value,$('step').value,distance);}catch(e){target.innerHTML='<div class="empty">Calculation precision out of range. Check your input values.</div>';save();return;}
+    const tradable=result!==null;
+    html+='<tr><td>'+distance+'</td><td class="'+(!tradable?'bad':'')+'">'+(tradable?result.lot:'NO TRADE')+'</td><td>'+(tradable?money(Number(result.loss)):'—')+'</td></tr>';
   }
   target.innerHTML=html+'</tbody></table>';
   save();
@@ -204,7 +213,7 @@ $('loadSettings').onclick=()=>{
 <script>
 (()=>{
 const status=document.getElementById('updateStatus'), button=document.getElementById('checkUpdate');
-const VERSION='5.0.8'; let reg, busy=false, reloading=false;
+const VERSION='5.0.9'; let reg, busy=false, reloading=false;
 const local=location.protocol==='file:', supported='serviceWorker' in navigator && !local && window.isSecureContext;
 function show(message){status.textContent=message;}
 async function check(manual=false){
@@ -277,7 +286,7 @@ $('exportReport').onclick=()=>{
  const c=canvas.getContext('2d');if(!c){alert('Image export is not supported in this browser.');return;}
  c.fillStyle='#091322';c.fillRect(0,0,canvas.width,canvas.height);
  c.font='bold 38px Arial';c.fillStyle='#65e3ad';c.fillText('BLACK SHIELD',40,65);
- c.font='20px Arial';c.fillStyle='#b4c5dc';c.fillText('Risk calculation report | V5.0.8',40,100);
+ c.font='20px Arial';c.fillStyle='#b4c5dc';c.fillText('Risk calculation report | V5.0.9',40,100);
  c.fillText(new Date().toLocaleString(),40,132);
  c.font='bold 25px Arial';c.fillStyle='#fff';c.fillText('Symbol: '+symbol.slice(0,40),40,180,920);
  c.font='22px Arial';c.fillText('Account: $'+$('balance').value+'   |   Risk: '+$('risk').value+'%',40,218,920);
@@ -287,7 +296,7 @@ $('exportReport').onclick=()=>{
  const foot=320+rows.length*43;c.fillStyle='#91a8c5';c.font='17px Arial';c.fillText('Estimates only. Verify broker specifications and USD conversion.',40,foot);c.fillText('Spread, commissions, slippage and swap are excluded.',40,foot+26);
  canvas.toBlob(blob=>{if(!blob){alert('Image export failed.');return;}const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='BLACK-SHIELD-'+symbol.replace(/[^a-z0-9_-]/gi,'_')+'-report.png';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),10000);},'image/png');
 };
-const version='5.0.8';
+const version='5.0.9';
 function older(a,b){const x=a.split('.').map(Number),y=b.split('.').map(Number);for(let i=0;i<3;i++){if(x[i]!==y[i])return x[i]<y[i];}return false;}
 function enforce(on,message){
  blocked=on;$('emergencyNotice').hidden=!on;$('emergencyText').textContent=message||'';
