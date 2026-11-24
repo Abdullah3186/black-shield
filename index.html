@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>BLACK SHIELD — Hybrid V5.0.7</title>
+<title>BLACK SHIELD — Hybrid V5.0.8</title>
 <style>
 *{box-sizing:border-box}
 body{margin:0;background:#091322;color:#eaf2ff;font-family:Arial,system-ui,sans-serif}
@@ -40,7 +40,7 @@ button:hover{background:#284a72}
 <body>
 <main class="wrap">
 <h1>BLACK <span style="color:#65e3ad">SHIELD</span></h1>
-<p class="sub">Risk & Lot Size Calculator · Hybrid V5.0.7 · Online + Offline</p>
+<p class="sub">Risk & Lot Size Calculator · Hybrid V5.0.8 · Online + Offline</p>
 
 <aside id="announcement" class="note" hidden role="status" style="margin-bottom:14px"><strong id="announcementTitle"></strong><p id="announcementText" style="white-space:pre-wrap"></p><button id="dismissAnnouncement" type="button">Dismiss</button></aside><div class="actions" style="margin-bottom:14px"><button id="installApp" type="button">Install desktop app</button><button id="miniApp" type="button">Floating calculator</button><button id="fullApp" type="button" hidden>Full dashboard</button></div><aside id="emergencyNotice" class="note" hidden style="border-color:#ff7777" role="alert"><strong>CRITICAL UPDATE REQUIRED</strong><p id="emergencyText"></p><button id="emergencyUpdate" type="button">Check for emergency update</button></aside><section class="panel">
   <div class="grid">
@@ -59,7 +59,7 @@ button:hover{background:#284a72}
   <div class="summary"><span>Risk amount</span><b id="budget">$15.00</b></div>
   <div class="note" id="activeSettings" aria-live="polite">Active settings loading…</div>
   <div class="actions"><button id="checkUpdate">Check for updates</button><span id="updateStatus" class="pill" role="status">Offline cache not yet verified</span>
-    <button id="riskLock" type="button" aria-pressed="false">Lock risk %</button><button id="exportReport" type="button">Export PNG report</button><button id="reset">Reset saved settings</button>
+    <button id="riskLock" type="button" aria-pressed="false">Lock risk %</button><button id="exportReport" type="button">Export PNG report</button><button id="saveSettings" type="button">Save settings</button><button id="loadSettings" type="button">Load saved settings</button><button id="reset" type="button">Reset settings</button><span id="settingsStatus" class="pill" role="status"></span>
   </div>
   <div class="note" id="profileNote"></div>
 </section>
@@ -159,10 +159,12 @@ fields.forEach(id=>{
   $(id).addEventListener('change',()=>{if(id==='symbol')applyProfile(false);else update();});
 });
 $('reset').addEventListener('click',()=>{
-  if($('risk').readOnly)return;
+  if(!confirm('Reset calculator to defaults? Your saved preset will be kept.'))return;
+  if($('risk').readOnly)$('riskLock').click();
+  $('symbol').replaceChildren(...allSymbols.map(s=>new Option(labels(s),s)));$('symbolSearch').value='';$('symbol').size=1;
   try{localStorage.removeItem('capitalguard_settings_v6');localStorage.removeItem('capitalguard_settings_v5');localStorage.removeItem('capitalguard_settings_v3');localStorage.removeItem('capitalguard_settings_v2');localStorage.removeItem('capitalguard_pips_v1');}catch(e){}
   $('balance').value=500;$('risk').value=3;$('symbol').value='NAS100';
-  $('minlot').value=0.10;$('step').value=0.01;activeSymbol='';
+  $('minlot').value=0.10;$('step').value=0.01;$('customSymbol').value='';activeSymbol='';
   applyProfile(true);
 });
 load();
@@ -182,13 +184,27 @@ function filterSymbols(){
 search.addEventListener('input',filterSymbols);
 search.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();const q=search.value.trim().toUpperCase();const m=allSymbols.filter(s=>(s+' '+(aliases[s]||'')+' '+(categories[s]||'')).toUpperCase().includes(q));if(m.length===1){select.value=m[0];select.dispatchEvent(new Event('change'));}}});
 select.addEventListener('change',()=>{search.value='';filterSymbols();});
-$('reset').addEventListener('click',()=>{if($('risk').readOnly)return;search.value='';select.replaceChildren(...allSymbols.map(s=>new Option(labels(s),s)));select.value='NAS100';select.size=1;});
+const presetKey='blackshield-manual-preset';
+const status=$('settingsStatus');
+$('saveSettings').onclick=()=>{
+ try{const data={};fields.forEach(id=>data[id]=$(id).value);data.locked=$('risk').readOnly;localStorage.setItem(presetKey,JSON.stringify(data));status.textContent='Settings saved successfully.';}
+ catch(e){status.textContent='Unable to save: browser storage unavailable.';}
+};
+$('loadSettings').onclick=()=>{
+ try{const raw=localStorage.getItem(presetKey);if(!raw){status.textContent='No manually saved settings found.';return;}const d=JSON.parse(raw);if(!allSymbols.includes(d.symbol))throw Error('Invalid symbol');
+ search.value='';select.replaceChildren(...allSymbols.map(s=>new Option(labels(s),s)));select.size=1;
+ fields.forEach(id=>{if(typeof d[id]==='string')$(id).value=d[id];});activeSymbol=$('symbol').value.toUpperCase();applyProfile(false);
+ if($('risk').readOnly!==(d.locked===true))$('riskLock').click();status.textContent='Saved settings restored.';}
+ catch(e){status.textContent='Unable to restore saved settings.';}
+};
+
+
 })();
 </script>
 <script>
 (()=>{
 const status=document.getElementById('updateStatus'), button=document.getElementById('checkUpdate');
-const VERSION='5.0.7'; let reg, busy=false, reloading=false;
+const VERSION='5.0.8'; let reg, busy=false, reloading=false;
 const local=location.protocol==='file:', supported='serviceWorker' in navigator && !local && window.isSecureContext;
 function show(message){status.textContent=message;}
 async function check(manual=false){
@@ -246,7 +262,7 @@ function applyLock(){
  $('risk').readOnly=locked;
  $('riskLock').textContent=locked?'Unlock risk %':'Lock risk %';
  $('riskLock').setAttribute('aria-pressed',String(locked));
- $('reset').disabled=locked;
+ $('reset').disabled=false;
 }
 applyLock();
 $('riskLock').onclick=()=>{locked=!locked;try{localStorage.setItem(lockKey,locked?'1':'0');}catch(e){}applyLock();};
@@ -261,18 +277,17 @@ $('exportReport').onclick=()=>{
  const c=canvas.getContext('2d');if(!c){alert('Image export is not supported in this browser.');return;}
  c.fillStyle='#091322';c.fillRect(0,0,canvas.width,canvas.height);
  c.font='bold 38px Arial';c.fillStyle='#65e3ad';c.fillText('BLACK SHIELD',40,65);
- c.font='20px Arial';c.fillStyle='#b4c5dc';c.fillText('Risk calculation report | V5.0.7',40,100);
+ c.font='20px Arial';c.fillStyle='#b4c5dc';c.fillText('Risk calculation report | V5.0.8',40,100);
  c.fillText(new Date().toLocaleString(),40,132);
  c.font='bold 25px Arial';c.fillStyle='#fff';c.fillText('Symbol: '+symbol.slice(0,40),40,180,920);
- c.font='22px Arial';c.fillText('Account: 
-</html>+$('balance').value+'   |   Risk: '+$('risk').value+'%',40,218,920);
+ c.font='22px Arial';c.fillText('Account: $'+$('balance').value+'   |   Risk: '+$('risk').value+'%',40,218,920);
  c.fillStyle='#65e3ad';c.fillText('Risk budget: '+$('budget').textContent,40,254);
  c.fillStyle='#b4c5dc';c.font='18px Arial';c.fillText('Contract: '+$('contract').value+' | Unit: '+$('pip').value+' | Min: '+$('minlot').value+' | Step: '+$('step').value,40,286,920);
  rows.forEach((row,i)=>{const y=308+i*43;c.fillStyle=i===0?'#243b54':i%2?'#111f34':'#14263b';c.fillRect(40,y,920,42);c.font=(i===0?'bold ':'')+'21px Arial';row.forEach((v,j)=>{c.fillStyle=v==='NO TRADE'?'#ff9b9b':j===1&&i>0?'#65e3ad':'#eaf2ff';c.fillText(v,[55,365,665][j],y+28,285);});});
  const foot=320+rows.length*43;c.fillStyle='#91a8c5';c.font='17px Arial';c.fillText('Estimates only. Verify broker specifications and USD conversion.',40,foot);c.fillText('Spread, commissions, slippage and swap are excluded.',40,foot+26);
  canvas.toBlob(blob=>{if(!blob){alert('Image export failed.');return;}const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='BLACK-SHIELD-'+symbol.replace(/[^a-z0-9_-]/gi,'_')+'-report.png';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),10000);},'image/png');
 };
-const version='5.0.7';
+const version='5.0.8';
 function older(a,b){const x=a.split('.').map(Number),y=b.split('.').map(Number);for(let i=0;i<3;i++){if(x[i]!==y[i])return x[i]<y[i];}return false;}
 function enforce(on,message){
  blocked=on;$('emergencyNotice').hidden=!on;$('emergencyText').textContent=message||'';
