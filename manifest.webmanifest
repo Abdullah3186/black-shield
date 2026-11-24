@@ -1,0 +1,18 @@
+{
+  "id": "./",
+  "name": "BLACK SHIELD Risk Calculator",
+  "short_name": "BLACK SHIELD",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#091322",
+  "theme_color": "#091322",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
