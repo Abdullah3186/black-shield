@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>BLACK SHIELD — Hybrid V5.0.3</title>
+<title>BLACK SHIELD — Hybrid V5.0.4</title>
 <style>
 *{box-sizing:border-box}
 body{margin:0;background:#091322;color:#eaf2ff;font-family:Arial,system-ui,sans-serif}
@@ -40,14 +40,14 @@ button:hover{background:#284a72}
 <body>
 <main class="wrap">
 <h1>BLACK <span style="color:#65e3ad">SHIELD</span></h1>
-<p class="sub">Risk & Lot Size Calculator · Hybrid V5.0.3 · Online + Offline</p>
+<p class="sub">Risk & Lot Size Calculator · Hybrid V5.0.4 · Online + Offline</p>
 
 <section class="panel">
   <div class="grid">
     <div><label for="balance">Account Balance ($)</label><input id="balance" type="number" min="0" step="any" value="500"></div>
     <div><label for="risk">Risk (%)</label><input id="risk" type="number" min="0" max="100" step="any" value="3"></div>
     <div><label for="symbol">Symbol</label>
-      <select id="symbol">
+      <input id="symbolSearch" type="search" placeholder="Search symbol..." aria-label="Search symbols" autocomplete="off" style="margin-bottom:7px"><select id="symbol">
         <option>NAS100</option><option>XAUUSD</option><option>BTCUSD</option>
         <option>EURUSD</option><option>GBPUSD</option><option>US30</option>
       </select>
@@ -163,12 +163,29 @@ $('reset').addEventListener('click',()=>{
   applyProfile(true);
 });
 load();
+const search=$('symbolSearch'), select=$('symbol');
+const allSymbols=Array.from(select.options,o=>o.value);
+const aliases={NAS100:'nasdaq us100 ustech',XAUUSD:'gold',BTCUSD:'bitcoin',US30:'dow jones',EURUSD:'euro',GBPUSD:'pound'};
+function filterSymbols(){
+ const q=search.value.trim().toUpperCase(), current=select.value;
+ const matches=allSymbols.filter(s=>(s+' '+(aliases[s]||'')).toUpperCase().includes(q));
+ select.replaceChildren();
+ if(!matches.includes(current)&&current){const o=new Option(current+' (current)',current);select.add(o);}
+ matches.forEach(s=>select.add(new Option(s,s)));
+ select.value=current;
+ select.size=q?Math.min(6,Math.max(2,select.options.length)):1;
+ search.setAttribute('aria-description',matches.length+' matching symbols');
+}
+search.addEventListener('input',filterSymbols);
+search.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();const q=search.value.trim().toUpperCase();const m=allSymbols.filter(s=>(s+' '+(aliases[s]||'')).toUpperCase().includes(q));if(m.length===1){select.value=m[0];select.dispatchEvent(new Event('change'));}}});
+select.addEventListener('change',()=>{search.value='';filterSymbols();});
+$('reset').addEventListener('click',()=>{search.value='';select.replaceChildren(...allSymbols.map(s=>new Option(s,s)));select.value='NAS100';select.size=1;});
 })();
 </script>
 <script>
 (()=>{
 const status=document.getElementById('updateStatus'), button=document.getElementById('checkUpdate');
-const VERSION='5.0.3'; let reg, busy=false, reloading=false;
+const VERSION='5.0.4'; let reg, busy=false, reloading=false;
 const local=location.protocol==='file:', supported='serviceWorker' in navigator && !local && window.isSecureContext;
 function show(message){status.textContent=message;}
 async function check(manual=false){
