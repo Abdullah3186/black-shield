@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>BLACK SHIELD — Hybrid V5.0.10</title>
+<title>BLACK SHIELD — Hybrid V5.0.11</title>
 <style>
 *{box-sizing:border-box}
 body{margin:0;background:#091322;color:#eaf2ff;font-family:Arial,system-ui,sans-serif}
@@ -40,7 +40,7 @@ button:hover{background:#284a72}
 <body>
 <main class="wrap">
 <h1>BLACK <span style="color:#65e3ad">SHIELD</span></h1>
-<p class="sub">Risk & Lot Size Calculator · Hybrid V5.0.10 · Online + Offline</p>
+<p class="sub">Risk & Lot Size Calculator · Hybrid V5.0.11 · Online + Offline</p>
 
 <aside id="announcement" class="note" hidden role="status" style="margin-bottom:14px"><strong id="announcementTitle"></strong><p id="announcementText" style="white-space:pre-wrap"></p><button id="dismissAnnouncement" type="button">Dismiss</button></aside><div class="actions" style="margin-bottom:14px"><button id="installApp" type="button">Install desktop app</button><button id="miniApp" type="button">Floating calculator</button><button id="fullApp" type="button" hidden>Full dashboard</button></div><aside id="emergencyNotice" class="note" hidden style="border-color:#ff7777" role="alert"><strong>CRITICAL UPDATE REQUIRED</strong><p id="emergencyText"></p><button id="emergencyUpdate" type="button">Check for emergency update</button></aside><section class="panel">
   <div class="grid">
@@ -66,7 +66,7 @@ button:hover{background:#284a72}
 
 <section class="panel">
   <div class="head"><h2>Lot Size Table</h2><span class="pill" id="unitPill">10–200 Handles</span></div>
-  <div id="result"></div>
+  <div class="grid" style="margin-bottom:15px"><div><label for="rangeStart">Start distance</label><input id="rangeStart" type="number" min="0.000001" step="any" value="10"></div><div><label for="rangeEnd">End distance</label><input id="rangeEnd" type="number" min="0.000001" step="any" value="200"></div><div><label for="rangeInterval">Distance interval</label><input id="rangeInterval" type="number" min="0.000001" step="any" value="10"></div></div><p class="hint" id="rangeNote">Choose your stop-loss distances in the selected symbol's units. Maximum 200 rows.</p><div id="result"></div>
   <p class="hint">
     Calculation (USD account assumption): risk amount ÷ (stop distance in price × contract size). The table unit's price size converts handles/pips/points into price distance.
     Lot sizes are rounded DOWN using your minimum lot and lot step so estimated risk does not exceed the selected budget.
@@ -79,7 +79,7 @@ button:hover{background:#284a72}
 (function(){
 'use strict';
 const $ = id => document.getElementById(id);
-const fields = ['balance','risk','symbol','contract','pip','minlot','step','customSymbol'];
+const fields = ['balance','risk','symbol','contract','pip','minlot','step','customSymbol','rangeStart','rangeEnd','rangeInterval'];
 const workingKey=new URLSearchParams(location.search).get('mini')==='1'?'blackshield-mini-settings':'capitalguard_settings_v6';
 const profiles = {
   NAS100:{contract:1,unitSize:1,unit:'Handles',note:'Default estimate only: 1 contract unit and 1.0 price point per handle.'},
@@ -125,6 +125,13 @@ function exactLot(balance,risk,contract,unit,min,step,distance){
  if(loss[0]*budget[1]>budget[0]*loss[1])throw Error('Risk invariant failed');
  return {lot:str(lot),loss:str(loss)};
 }
+function distances(start,end,interval){
+ function scaled(v){const m=String(v).trim().match(/^(\d{1,9})(?:\.(\d{1,6}))?$/);if(!m)throw Error('Enter positive distances with up to 6 decimal places and 9 whole digits.');return BigInt(m[1])*1000000n+BigInt((m[2]||'').padEnd(6,'0'));}
+ const a=scaled(start),b=scaled(end),d=scaled(interval);
+ if(a<=0n||b<a||d<=0n)throw Error('Start and interval must be positive; end must be at least start.');
+ const count=(b-a)/d+1n;if(count>200n)throw Error('Maximum 200 rows. Increase the interval or reduce the range.');
+ const out=[];for(let x=a;x<=b;x+=d){const frac=String(x%1000000n).padStart(6,'0').replace(/0+$/,'');out.push(String(x/1000000n)+(frac?'.'+frac:''));}return out;
+}
 function update(){
   const b=readNumber('balance'), r=readNumber('risk');
   const c=readNumber('contract'), unitSize=readNumber('pip');
@@ -139,8 +146,11 @@ function update(){
     target.innerHTML='<div class="empty">Enter valid broker specifications and positive numbers (including a custom symbol name if selected). Risk must be greater than 0% and no more than 100%.</div>';
     save(); return;
   }
+  let rows;
+  try{rows=distances($('rangeStart').value,$('rangeEnd').value,$('rangeInterval').value);}catch(e){$('unitPill').textContent=p.unit;target.textContent=e.message;save();return;}
+  $('unitPill').textContent=rows[0]+'–'+rows[rows.length-1]+' '+p.unit;
   let html='<table><thead><tr><th>'+p.unit+'</th><th>Lot size</th><th>Estimated risk</th></tr></thead><tbody>';
-  for(let distance=10;distance<=200;distance+=10){
+  for(const distance of rows){
     let result=null;
     try{result=exactLot($('balance').value,$('risk').value,$('contract').value,$('pip').value,$('minlot').value,$('step').value,distance);}catch(e){target.innerHTML='<div class="empty">Calculation precision out of range. Check your input values.</div>';save();return;}
     const tradable=result!==null;
@@ -175,6 +185,7 @@ $('reset').addEventListener('click',()=>{
   try{localStorage.removeItem(workingKey);}catch(e){}
   $('balance').value=500;$('risk').value=3;$('symbol').value='NAS100';
   $('minlot').value=0.10;$('step').value=0.01;$('customSymbol').value='';activeSymbol='';
+  $('rangeStart').value=10;$('rangeEnd').value=200;$('rangeInterval').value=10;
   applyProfile(true);
 });
 load();
@@ -214,7 +225,7 @@ $('loadSettings').onclick=()=>{
 <script>
 (()=>{
 const status=document.getElementById('updateStatus'), button=document.getElementById('checkUpdate');
-const VERSION='5.0.10'; let reg, busy=false, reloading=false;
+const VERSION='5.0.11'; let reg, busy=false, reloading=false;
 const local=location.protocol==='file:', supported='serviceWorker' in navigator && !local && window.isSecureContext;
 function show(message){status.textContent=message;}
 async function check(manual=false){
@@ -287,7 +298,7 @@ $('exportReport').onclick=()=>{
  const c=canvas.getContext('2d');if(!c){alert('Image export is not supported in this browser.');return;}
  c.fillStyle='#091322';c.fillRect(0,0,canvas.width,canvas.height);
  c.font='bold 38px Arial';c.fillStyle='#65e3ad';c.fillText('BLACK SHIELD',40,65);
- c.font='20px Arial';c.fillStyle='#b4c5dc';c.fillText('Risk calculation report | V5.0.10',40,100);
+ c.font='20px Arial';c.fillStyle='#b4c5dc';c.fillText('Risk calculation report | V5.0.11',40,100);
  c.fillText(new Date().toLocaleString(),40,132);
  c.font='bold 25px Arial';c.fillStyle='#fff';c.fillText('Symbol: '+symbol.slice(0,40),40,180,920);
  c.font='22px Arial';c.fillText('Account: $'+$('balance').value+'   |   Risk: '+$('risk').value+'%',40,218,920);
@@ -297,7 +308,7 @@ $('exportReport').onclick=()=>{
  const foot=320+rows.length*43;c.fillStyle='#91a8c5';c.font='17px Arial';c.fillText('Estimates only. Verify broker specifications and USD conversion.',40,foot);c.fillText('Spread, commissions, slippage and swap are excluded.',40,foot+26);
  canvas.toBlob(blob=>{if(!blob){alert('Image export failed.');return;}const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='BLACK-SHIELD-'+symbol.replace(/[^a-z0-9_-]/gi,'_')+'-report.png';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),10000);},'image/png');
 };
-const version='5.0.10';
+const version='5.0.11';
 function older(a,b){const x=a.split('.').map(Number),y=b.split('.').map(Number);for(let i=0;i<3;i++){if(x[i]!==y[i])return x[i]<y[i];}return false;}
 function enforce(on,message){
  blocked=on;$('emergencyNotice').hidden=!on;$('emergencyText').textContent=message||'';
