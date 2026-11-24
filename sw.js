@@ -1,4 +1,4 @@
-const VERSION='5.0.8';
+const VERSION='5.0.9';
 const PREFIX='black-shield-'+self.registration.scope+'-';
 const CACHE=PREFIX+VERSION;
 const HOME=new URL('./index.html',self.registration.scope).href;
