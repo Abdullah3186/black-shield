@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>BLACK SHIELD — Hybrid V5.0.11</title>
+<title>BLACK SHIELD — Hybrid V5.0.12</title>
 <style>
 *{box-sizing:border-box}
 body{margin:0;background:#091322;color:#eaf2ff;font-family:Arial,system-ui,sans-serif}
@@ -40,7 +40,7 @@ button:hover{background:#284a72}
 <body>
 <main class="wrap">
 <h1>BLACK <span style="color:#65e3ad">SHIELD</span></h1>
-<p class="sub">Risk & Lot Size Calculator · Hybrid V5.0.11 · Online + Offline</p>
+<p class="sub">Risk & Lot Size Calculator · Hybrid V5.0.12 · Online + Offline</p>
 
 <aside id="announcement" class="note" hidden role="status" style="margin-bottom:14px"><strong id="announcementTitle"></strong><p id="announcementText" style="white-space:pre-wrap"></p><button id="dismissAnnouncement" type="button">Dismiss</button></aside><div class="actions" style="margin-bottom:14px"><button id="installApp" type="button">Install desktop app</button><button id="miniApp" type="button">Floating calculator</button><button id="fullApp" type="button" hidden>Full dashboard</button></div><aside id="emergencyNotice" class="note" hidden style="border-color:#ff7777" role="alert"><strong>CRITICAL UPDATE REQUIRED</strong><p id="emergencyText"></p><button id="emergencyUpdate" type="button">Check for emergency update</button></aside><section class="panel">
   <div class="grid">
@@ -158,6 +158,7 @@ function update(){
   }
   target.innerHTML=html+'</tbody></table>';
   save();
+  window.dispatchEvent(new Event('blackshield:calculation'));
 }
 function save(){
   try{const data={};fields.forEach(id=>data[id]=$(id).value);localStorage.setItem(workingKey,JSON.stringify(data));}catch(e){}
@@ -225,7 +226,7 @@ $('loadSettings').onclick=()=>{
 <script>
 (()=>{
 const status=document.getElementById('updateStatus'), button=document.getElementById('checkUpdate');
-const VERSION='5.0.11'; let reg, busy=false, reloading=false;
+const VERSION='5.0.12'; let reg, busy=false, reloading=false;
 const local=location.protocol==='file:', supported='serviceWorker' in navigator && !local && window.isSecureContext;
 function show(message){status.textContent=message;}
 async function check(manual=false){
@@ -298,7 +299,7 @@ $('exportReport').onclick=()=>{
  const c=canvas.getContext('2d');if(!c){alert('Image export is not supported in this browser.');return;}
  c.fillStyle='#091322';c.fillRect(0,0,canvas.width,canvas.height);
  c.font='bold 38px Arial';c.fillStyle='#65e3ad';c.fillText('BLACK SHIELD',40,65);
- c.font='20px Arial';c.fillStyle='#b4c5dc';c.fillText('Risk calculation report | V5.0.11',40,100);
+ c.font='20px Arial';c.fillStyle='#b4c5dc';c.fillText('Risk calculation report | V5.0.12',40,100);
  c.fillText(new Date().toLocaleString(),40,132);
  c.font='bold 25px Arial';c.fillStyle='#fff';c.fillText('Symbol: '+symbol.slice(0,40),40,180,920);
  c.font='22px Arial';c.fillText('Account: $'+$('balance').value+'   |   Risk: '+$('risk').value+'%',40,218,920);
@@ -308,7 +309,7 @@ $('exportReport').onclick=()=>{
  const foot=320+rows.length*43;c.fillStyle='#91a8c5';c.font='17px Arial';c.fillText('Estimates only. Verify broker specifications and USD conversion.',40,foot);c.fillText('Spread, commissions, slippage and swap are excluded.',40,foot+26);
  canvas.toBlob(blob=>{if(!blob){alert('Image export failed.');return;}const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='BLACK-SHIELD-'+symbol.replace(/[^a-z0-9_-]/gi,'_')+'-report.png';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),10000);},'image/png');
 };
-const version='5.0.11';
+const version='5.0.12';
 function older(a,b){const x=a.split('.').map(Number),y=b.split('.').map(Number);for(let i=0;i<3;i++){if(x[i]!==y[i])return x[i]<y[i];}return false;}
 function enforce(on,message){
  blocked=on;$('emergencyNotice').hidden=!on;$('emergencyText').textContent=message||'';
@@ -325,6 +326,34 @@ async function policy(){
 }
 $('emergencyUpdate').onclick=()=>{$('checkUpdate').click();policy();};
 policy();setInterval(policy,60000);window.addEventListener('online',policy);document.addEventListener('visibilitychange',()=>{if(!document.hidden)policy();});
+})();
+</script><script>
+(()=>{
+'use strict';
+const measurementId=''; // Owner: configure a valid GA4 G- ID before enabling.
+const version='5.0.12';
+const key='blackshield-analytics-consent';
+let active=false,lastCalc=0,lastError=0;
+function emit(name){if(!active||!navigator.onLine)return;window.gtag('event',name,{app_version:version});}
+window.addEventListener('blackshield:calculation',()=>{const now=Date.now();if(now-lastCalc>=1000){lastCalc=now;emit('calculator_update');}});
+window.addEventListener('appinstalled',()=>emit('desktop_install'));
+window.addEventListener('error',()=>{const now=Date.now();if(now-lastError>=60000){lastError=now;emit('app_error');}});
+window.addEventListener('unhandledrejection',()=>{const now=Date.now();if(now-lastError>=60000){lastError=now;emit('app_error');}});
+function start(){
+ if(active||!/^G-[A-Z0-9]+$/.test(measurementId)||!navigator.onLine||location.protocol!=='https:')return;
+ active=true;window['ga-disable-'+measurementId]=false;window.dataLayer=window.dataLayer||[];window.gtag=function(){window.dataLayer.push(arguments);};
+ window.gtag('js',new Date());window.gtag('config',measurementId,{allow_google_signals:false,allow_ad_personalization_signals:false,send_page_view:false});
+ window.gtag('event','page_view',{page_location:location.origin+location.pathname,page_title:'BLACK SHIELD',app_version:version});
+ const script=document.createElement('script');script.async=true;script.src='https://www.googletagmanager.com/gtag/js?id='+encodeURIComponent(measurementId);document.head.appendChild(script);
+}
+if(!/^G-[A-Z0-9]+$/.test(measurementId)||location.protocol!=='https:')return;
+const panel=document.createElement('aside');panel.className='note';panel.textContent='Optional usage analytics: counts visits, calculation updates, installs and technical errors using Google Analytics. No trading settings are sent. Google may process browser/device and approximate location data. ';
+const yes=document.createElement('button'),no=document.createElement('button');yes.textContent='Allow analytics';no.textContent='Decline';panel.append(yes,no);document.querySelector('main').appendChild(panel);
+const manage=document.createElement('button');manage.textContent='Analytics privacy';document.querySelector('main').appendChild(manage);manage.onclick=()=>{panel.hidden=false;};
+let choice='';try{choice=localStorage.getItem(key)||'';}catch(e){}
+function choose(v){choice=v;try{localStorage.setItem(key,v);}catch(e){}panel.hidden=true;if(v==='yes'){window['ga-disable-'+measurementId]=false;if(!active)start();}else{window['ga-disable-'+measurementId]=true;active=false;}}
+yes.onclick=()=>choose('yes');no.onclick=()=>choose('no');if(choice){panel.hidden=true;if(choice==='yes')start();}
+window.addEventListener('online',()=>{if(choice==='yes')start();});
 })();
 </script></body>
 </html>
