@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>BLACK SHIELD — Hybrid V5.0.5</title>
+<title>BLACK SHIELD — Hybrid V5.0.6</title>
 <style>
 *{box-sizing:border-box}
 body{margin:0;background:#091322;color:#eaf2ff;font-family:Arial,system-ui,sans-serif}
@@ -35,14 +35,14 @@ button:hover{background:#284a72}
 .actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:14px}
 @media(max-width:680px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.panel{padding:15px}.wrap{padding:16px 10px}.summary b{font-size:20px}}
 @media(max-width:410px){.grid{grid-template-columns:1fr 1fr}input,select{font-size:14px}}
-</style>
-</head>
+[hidden]{display:none!important}.compact .wrap{max-width:480px;padding:10px}.compact .grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.compact .panel{padding:12px;margin-bottom:8px}.compact .hint,.compact #profileNote{display:none}.compact td,.compact th{padding:7px}.compact .sub{margin-bottom:10px}.compact h1{font-size:20px}.compact input,.compact select{font-size:13px;padding:8px}</style>
+<link rel="manifest" href="./manifest.webmanifest"><link rel="icon" href="./icon.svg" type="image/svg+xml"><meta name="theme-color" content="#091322"></head>
 <body>
 <main class="wrap">
 <h1>BLACK <span style="color:#65e3ad">SHIELD</span></h1>
-<p class="sub">Risk & Lot Size Calculator · Hybrid V5.0.5 · Online + Offline</p>
+<p class="sub">Risk & Lot Size Calculator · Hybrid V5.0.6 · Online + Offline</p>
 
-<section class="panel">
+<aside id="announcement" class="note" hidden role="status" style="margin-bottom:14px"><strong id="announcementTitle"></strong><p id="announcementText" style="white-space:pre-wrap"></p><button id="dismissAnnouncement" type="button">Dismiss</button></aside><div class="actions" style="margin-bottom:14px"><button id="installApp" type="button">Install desktop app</button><button id="miniApp" type="button">Floating calculator</button><button id="fullApp" type="button" hidden>Full dashboard</button></div><section class="panel">
   <div class="grid">
     <div><label for="balance">Account Balance ($)</label><input id="balance" type="number" min="0" step="any" value="500"></div>
     <div><label for="risk">Risk (%)</label><input id="risk" type="number" min="0" max="100" step="any" value="3"></div>
@@ -187,7 +187,7 @@ $('reset').addEventListener('click',()=>{search.value='';select.replaceChildren(
 <script>
 (()=>{
 const status=document.getElementById('updateStatus'), button=document.getElementById('checkUpdate');
-const VERSION='5.0.5'; let reg, busy=false, reloading=false;
+const VERSION='5.0.6'; let reg, busy=false, reloading=false;
 const local=location.protocol==='file:', supported='serviceWorker' in navigator && !local && window.isSecureContext;
 function show(message){status.textContent=message;}
 async function check(manual=false){
@@ -206,6 +206,34 @@ let controlled=!!navigator.serviceWorker.controller;
 navigator.serviceWorker.addEventListener('controllerchange',()=>{if(controlled&&!reloading){reloading=true;location.reload();}controlled=true;});
 window.addEventListener('online',()=>check());document.addEventListener('visibilitychange',()=>{if(!document.hidden)check();});
 navigator.serviceWorker.register('./sw.js',{updateViaCache:'none'}).then(r=>{reg=r;return navigator.serviceWorker.ready;}).then(()=>{show('Offline cache ready · V'+VERSION);check();setInterval(check,60000);}).catch(e=>show('Update service setup failed: '+e.message));
+})();
+</script><script>
+(()=>{
+const $=id=>document.getElementById(id);
+let promptEvent=null, announcementId='', dismissed='';
+try{dismissed=localStorage.getItem('blackshield-dismissed')||'';}catch(e){}
+async function announcements(){
+ if(location.protocol==='file:'||!navigator.onLine)return;
+ try{
+ const res=await fetch('./announcement.json?t='+Date.now(),{cache:'no-store'});
+ if(!res.ok)return;
+ const a=await res.json();
+ if(!a.enabled||typeof a.id!=='string'||typeof a.message!=='string'||a.id===dismissed){$('announcement').hidden=true;return;}
+ announcementId=a.id;
+ $('announcementTitle').textContent=String(a.title||'Owner announcement').slice(0,150);
+ $('announcementText').textContent=a.message.slice(0,4000);
+ $('announcement').hidden=false;
+ }catch(e){}
+}
+$('dismissAnnouncement').onclick=()=>{dismissed=announcementId;try{localStorage.setItem('blackshield-dismissed',dismissed);}catch(e){}$('announcement').hidden=true;};
+announcements();setInterval(announcements,60000);window.addEventListener('online',announcements);
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();promptEvent=e;});
+window.addEventListener('appinstalled',()=>{promptEvent=null;$('installApp').textContent='App installed';});
+$('installApp').onclick=async()=>{if(promptEvent){const p=promptEvent;promptEvent=null;await p.prompt();}else if(matchMedia('(display-mode: standalone)').matches){alert('BLACK SHIELD is already running as an installed app.');}else{alert('In Chrome or Edge, open the browser menu and choose Install app or Install this site as an app if available.');}};
+const compact=new URLSearchParams(location.search).get('mini')==='1';
+if(compact){document.body.classList.add('compact');$('fullApp').hidden=false;$('miniApp').hidden=true;$('installApp').hidden=true;}
+$('miniApp').onclick=()=>{const u=new URL(location.href);u.searchParams.set('mini','1');const win=window.open(u.href,'blackShieldMini','popup,width=460,height=690,resizable=yes,scrollbars=yes');if(!win){location.href=u.href;}else{win.focus();}};
+$('fullApp').onclick=()=>{const u=new URL(location.href);u.searchParams.delete('mini');location.href=u.href;};
 })();
 </script></body>
 </html>
