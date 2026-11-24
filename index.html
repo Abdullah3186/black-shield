@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>BLACK SHIELD — Hybrid V5.0.15</title>
+<title>BLACK SHIELD — Hybrid V5.0.16</title>
 <style>
 *{box-sizing:border-box}
 body{margin:0;background:#091322;color:#eaf2ff;font-family:Arial,system-ui,sans-serif}
@@ -40,9 +40,9 @@ button:hover{background:#284a72}
 <body>
 <main class="wrap">
 <h1>BLACK <span style="color:#65e3ad">SHIELD</span></h1>
-<p class="sub">Risk & Lot Size Calculator · Hybrid V5.0.15 · Online + Offline</p>
+<p class="sub">Risk & Lot Size Calculator · Hybrid V5.0.16 · Online + Offline</p>
 
-<aside id="announcement" class="note" hidden role="status" style="margin-bottom:14px"><strong id="announcementTitle"></strong><p id="announcementText" style="white-space:pre-wrap"></p><button id="dismissAnnouncement" type="button">Dismiss</button></aside><div class="actions" style="margin-bottom:14px"><button id="installApp" type="button">Install desktop app</button><button id="miniApp" type="button">Floating calculator</button><button id="fullApp" type="button" hidden>Full dashboard</button></div><aside id="emergencyNotice" class="note" hidden style="border-color:#ff7777" role="alert"><strong>CRITICAL UPDATE REQUIRED</strong><p id="emergencyText"></p><button id="emergencyUpdate" type="button">Check for emergency update</button></aside><section class="panel">
+<aside id="announcement" class="note" hidden role="status" style="margin-bottom:14px"><strong id="announcementTitle"></strong><p id="announcementText" style="white-space:pre-wrap"></p><button id="dismissAnnouncement" type="button">Dismiss</button></aside><div class="actions" style="margin-bottom:14px"><button id="installApp" type="button">Install desktop app</button><button id="miniApp" type="button">Floating calculator</button><button id="fullApp" type="button" hidden>Full dashboard</button><button id="adminApp" type="button">Admin Dashboard</button></div><aside id="emergencyNotice" class="note" hidden style="border-color:#ff7777" role="alert"><strong>CRITICAL UPDATE REQUIRED</strong><p id="emergencyText"></p><button id="emergencyUpdate" type="button">Check for emergency update</button></aside><section class="panel">
   <div class="grid">
     <div><label for="balance">Account Balance ($)</label><input id="balance" type="number" min="0" step="any" value="500"></div>
     <div><label for="risk">Risk (%)</label><input id="risk" type="number" min="0" max="100" step="any" value="3"></div>
@@ -226,7 +226,7 @@ $('loadSettings').onclick=()=>{
 <script>
 (()=>{
 const status=document.getElementById('updateStatus'), button=document.getElementById('checkUpdate');
-const VERSION='5.0.15'; let reg, busy=false, reloading=false;
+const VERSION='5.0.16'; let reg, busy=false, reloading=false;
 const local=location.protocol==='file:', supported='serviceWorker' in navigator && !local && window.isSecureContext;
 function show(message){status.textContent=message;}
 async function check(manual=false){
@@ -272,6 +272,7 @@ $('installApp').onclick=async()=>{if(promptEvent){const p=promptEvent;promptEven
 const compact=new URLSearchParams(location.search).get('mini')==='1';
 if(compact){document.body.classList.add('compact');$('fullApp').hidden=false;$('miniApp').hidden=true;$('installApp').hidden=true;}
 $('miniApp').onclick=()=>{const u=new URL(location.href);u.searchParams.set('mini','1');const win=window.open(u.href,'blackShieldMini','popup,width=460,height=690,resizable=yes,scrollbars=yes');if(!win){location.href=u.href;}else{win.focus();}};
+$('adminApp').onclick=()=>{if(!navigator.onLine){alert('Admin dashboard requires an internet connection.');return;}location.href=new URL('./admin.html',location.href).href;};
 $('fullApp').onclick=()=>{const u=new URL(location.href);u.searchParams.delete('mini');location.href=u.href;};
 })();
 </script><script>
@@ -299,7 +300,7 @@ $('exportReport').onclick=()=>{
  const c=canvas.getContext('2d');if(!c){alert('Image export is not supported in this browser.');return;}
  c.fillStyle='#091322';c.fillRect(0,0,canvas.width,canvas.height);
  c.font='bold 38px Arial';c.fillStyle='#65e3ad';c.fillText('BLACK SHIELD',40,65);
- c.font='20px Arial';c.fillStyle='#b4c5dc';c.fillText('Risk calculation report | V5.0.15',40,100);
+ c.font='20px Arial';c.fillStyle='#b4c5dc';c.fillText('Risk calculation report | V5.0.16',40,100);
  c.fillText(new Date().toLocaleString(),40,132);
  c.font='bold 25px Arial';c.fillStyle='#fff';c.fillText('Symbol: '+symbol.slice(0,40),40,180,920);
  c.font='22px Arial';c.fillText('Account: $'+$('balance').value+'   |   Risk: '+$('risk').value+'%',40,218,920);
@@ -309,7 +310,7 @@ $('exportReport').onclick=()=>{
  const foot=320+rows.length*43;c.fillStyle='#91a8c5';c.font='17px Arial';c.fillText('Estimates only. Verify broker specifications and USD conversion.',40,foot);c.fillText('Spread, commissions, slippage and swap are excluded.',40,foot+26);
  canvas.toBlob(blob=>{if(!blob){alert('Image export failed.');return;}const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='BLACK-SHIELD-'+symbol.replace(/[^a-z0-9_-]/gi,'_')+'-report.png';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),10000);},'image/png');
 };
-const version='5.0.15';
+const version='5.0.16';
 function older(a,b){const x=a.split('.').map(Number),y=b.split('.').map(Number);for(let i=0;i<3;i++){if(x[i]!==y[i])return x[i]<y[i];}return false;}
 function enforce(on,message){
  blocked=on;$('emergencyNotice').hidden=!on;$('emergencyText').textContent=message||'';
