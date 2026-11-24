@@ -1,0 +1,17 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>BLACK SHIELD Admin</title><style>body{background:#091322;color:#eaf2ff;font:16px Arial,sans-serif;margin:0}main{max-width:650px;margin:60px auto;padding:20px}h1{color:#65e3ad}button,a{color:#eaf2ff}button{padding:12px;background:#1c3655;border:1px solid #395778;border-radius:8px;cursor:pointer}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:15px}article{background:#111f34;padding:24px;border:1px solid #263b56;border-radius:14px}strong{display:block;font-size:42px;color:#65e3ad;margin-top:12px}[hidden]{display:none!important}p{color:#b4c5dc;line-height:1.6}</style></head><body><main><h1>BLACK SHIELD ADMIN</h1><p id="status" role="status">Sign in using your authorized Google account.</p><button id="login">Sign in with Google</button> <button id="logout" hidden>Sign out</button><section id="metrics" hidden><div class="grid"><article>Online now<strong id="online">—</strong></article><article>Total tracked visitors<strong id="visitors">—</strong></article></div><p>Online counts distinct connected browser identities, not individual people. Lifetime visitors count browser identities since tracking began. Offline users are excluded.</p></section><p><a href="./">Return to calculator</a></p></main><script type="module">import {initializeApp} from 'https://www.gstatic.com/firebasejs/13.4.0/firebase-app.js';
+import {getAuth,signInAnonymously,browserLocalPersistence,setPersistence,onAuthStateChanged,GoogleAuthProvider,signInWithPopup,signOut,inMemoryPersistence} from 'https://www.gstatic.com/firebasejs/13.4.0/firebase-auth.js';
+import {getDatabase,ref,push,set,onDisconnect,onValue,serverTimestamp} from 'https://www.gstatic.com/firebasejs/13.4.0/firebase-database.js';
+const config={"apiKey":"AIzaSyAmRzKgdy4fjUeILlGaX8XepOUe0JRGDaw","authDomain":"black-shield-458e1.firebaseapp.com","databaseURL":"https://black-shield-458e1-default-rtdb.firebaseio.com","projectId":"black-shield-458e1","appId":"1:165406767425:web:832441bae7224fe5e909c0"};
+const $=id=>document.getElementById(id);
+const app=initializeApp(config,'blackshield-admin'),auth=getAuth(app),db=getDatabase(app);
+let unsub=[],epoch=0;
+function clear(){epoch++;unsub.forEach(fn=>fn());unsub=[];$('metrics').hidden=true;$('online').textContent='—';$('visitors').textContent='—';}
+await setPersistence(auth,inMemoryPersistence);
+$('login').onclick=async()=>{try{await signInWithPopup(auth,new GoogleAuthProvider());}catch(e){$('status').textContent='Sign-in failed: '+(e.code||'unknown');}};
+$('logout').onclick=()=>signOut(auth);
+onAuthStateChanged(auth,user=>{clear();$('login').hidden=!!user;$('logout').hidden=!user;if(!user){$('status').textContent='Sign in using your authorized Google account.';return;}const g=epoch;let ready=new Set();let failed=false;
+function denied(){if(g!==epoch)return;failed=true;clear();$('status').textContent='Access denied or database rules not published. Sign out and check configuration.';}
+function listen(path,id){unsub.push(onValue(ref(db,path),snap=>{if(g!==epoch||failed)return;$(id).textContent=String(snap.size);ready.add(id);if(ready.size===2){$('metrics').hidden=false;$('status').textContent='Connected to private analytics.';}},denied));}
+listen('presence','online');listen('visitors','visitors');
+});
+</script></body></html>
