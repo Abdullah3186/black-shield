@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>BLACK SHIELD — Hybrid V5.0.9</title>
+<title>BLACK SHIELD — Hybrid V5.0.10</title>
 <style>
 *{box-sizing:border-box}
 body{margin:0;background:#091322;color:#eaf2ff;font-family:Arial,system-ui,sans-serif}
@@ -40,7 +40,7 @@ button:hover{background:#284a72}
 <body>
 <main class="wrap">
 <h1>BLACK <span style="color:#65e3ad">SHIELD</span></h1>
-<p class="sub">Risk & Lot Size Calculator · Hybrid V5.0.9 · Online + Offline</p>
+<p class="sub">Risk & Lot Size Calculator · Hybrid V5.0.10 · Online + Offline</p>
 
 <aside id="announcement" class="note" hidden role="status" style="margin-bottom:14px"><strong id="announcementTitle"></strong><p id="announcementText" style="white-space:pre-wrap"></p><button id="dismissAnnouncement" type="button">Dismiss</button></aside><div class="actions" style="margin-bottom:14px"><button id="installApp" type="button">Install desktop app</button><button id="miniApp" type="button">Floating calculator</button><button id="fullApp" type="button" hidden>Full dashboard</button></div><aside id="emergencyNotice" class="note" hidden style="border-color:#ff7777" role="alert"><strong>CRITICAL UPDATE REQUIRED</strong><p id="emergencyText"></p><button id="emergencyUpdate" type="button">Check for emergency update</button></aside><section class="panel">
   <div class="grid">
@@ -80,6 +80,7 @@ button:hover{background:#284a72}
 'use strict';
 const $ = id => document.getElementById(id);
 const fields = ['balance','risk','symbol','contract','pip','minlot','step','customSymbol'];
+const workingKey=new URLSearchParams(location.search).get('mini')==='1'?'blackshield-mini-settings':'capitalguard_settings_v6';
 const profiles = {
   NAS100:{contract:1,unitSize:1,unit:'Handles',note:'Default estimate only: 1 contract unit and 1.0 price point per handle.'},
   US30:{contract:1,unitSize:1,unit:'Handles',note:'Default estimate only: 1 contract unit and 1.0 price point per handle.'},
@@ -101,11 +102,11 @@ function applyProfile(force){
     $('contract').value=p.contract;
     $('pip').value=p.unitSize;
     activeSymbol=s;
-    if(!Object.prototype.hasOwnProperty.call(profiles,s)){ $('minlot').value=''; $('step').value=''; }
+    if(!force){ $('minlot').value=''; $('step').value=''; }
   }
   $('customSymbol').hidden=s!=='CUSTOM';
   $('unitPill').textContent='10–200 '+p.unit;
-  $('profileNote').textContent=p.note+' These are starting assumptions, not guaranteed broker specifications. You can edit both values.';
+  $('profileNote').textContent=p.note+' These are starting assumptions, not guaranteed broker specifications. Verify contract size, unit size, minimum lot and lot step for your broker.';
   update();
 }
 function readNumber(id){const raw=$(id).value.trim();return raw===''?NaN:Number(raw);}
@@ -149,12 +150,12 @@ function update(){
   save();
 }
 function save(){
-  try{const data={};fields.forEach(id=>data[id]=$(id).value);localStorage.setItem('capitalguard_settings_v6',JSON.stringify(data));}catch(e){}
+  try{const data={};fields.forEach(id=>data[id]=$(id).value);localStorage.setItem(workingKey,JSON.stringify(data));}catch(e){}
 }
 function load(){
   let loaded=false;
   try{
-    const raw=localStorage.getItem('capitalguard_settings_v6');
+    const raw=localStorage.getItem(workingKey)||(workingKey==='blackshield-mini-settings'?localStorage.getItem('capitalguard_settings_v6'):null);
     if(raw){const d=JSON.parse(raw);loaded=true;fields.forEach(id=>{if(d[id]!==undefined)$(id).value=d[id];});}
   }catch(e){}
   activeSymbol=$('symbol').value.toUpperCase();
@@ -164,14 +165,14 @@ function load(){
   else {const p=symbolProfile();$('unitPill').textContent='10–200 '+p.unit;$('profileNote').textContent=p.note+' These are starting assumptions, not guaranteed broker specifications. You can edit both values.';update();}
 }
 fields.forEach(id=>{
-  $(id).addEventListener('input',()=>{if(id==='symbol')applyProfile(false);else update();});
+  $(id).addEventListener('input',()=>{if(id==='symbol')applyProfile(false);else if(id==='customSymbol') { if($('symbol').value==='CUSTOM'){ $('contract').value='';$('pip').value='';$('minlot').value='';$('step').value=''; } update(); }else update();});
   $(id).addEventListener('change',()=>{if(id==='symbol')applyProfile(false);else update();});
 });
 $('reset').addEventListener('click',()=>{
   if(!confirm('Reset calculator to defaults? Your saved preset will be kept.'))return;
   if($('risk').readOnly)$('riskLock').click();
   $('symbol').replaceChildren(...allSymbols.map(s=>new Option(labels(s),s)));$('symbolSearch').value='';$('symbol').size=1;
-  try{localStorage.removeItem('capitalguard_settings_v6');localStorage.removeItem('capitalguard_settings_v5');localStorage.removeItem('capitalguard_settings_v3');localStorage.removeItem('capitalguard_settings_v2');localStorage.removeItem('capitalguard_pips_v1');}catch(e){}
+  try{localStorage.removeItem(workingKey);}catch(e){}
   $('balance').value=500;$('risk').value=3;$('symbol').value='NAS100';
   $('minlot').value=0.10;$('step').value=0.01;$('customSymbol').value='';activeSymbol='';
   applyProfile(true);
@@ -193,7 +194,7 @@ function filterSymbols(){
 search.addEventListener('input',filterSymbols);
 search.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();const q=search.value.trim().toUpperCase();const m=allSymbols.filter(s=>(s+' '+(aliases[s]||'')+' '+(categories[s]||'')).toUpperCase().includes(q));if(m.length===1){select.value=m[0];select.dispatchEvent(new Event('change'));}}});
 select.addEventListener('change',()=>{search.value='';filterSymbols();});
-const presetKey='blackshield-manual-preset';
+const presetKey=workingKey==='blackshield-mini-settings'?'blackshield-mini-manual-preset':'blackshield-manual-preset';
 const status=$('settingsStatus');
 $('saveSettings').onclick=()=>{
  try{const data={};fields.forEach(id=>data[id]=$(id).value);data.locked=$('risk').readOnly;localStorage.setItem(presetKey,JSON.stringify(data));status.textContent='Settings saved successfully.';}
@@ -213,7 +214,7 @@ $('loadSettings').onclick=()=>{
 <script>
 (()=>{
 const status=document.getElementById('updateStatus'), button=document.getElementById('checkUpdate');
-const VERSION='5.0.9'; let reg, busy=false, reloading=false;
+const VERSION='5.0.10'; let reg, busy=false, reloading=false;
 const local=location.protocol==='file:', supported='serviceWorker' in navigator && !local && window.isSecureContext;
 function show(message){status.textContent=message;}
 async function check(manual=false){
@@ -264,7 +265,7 @@ $('fullApp').onclick=()=>{const u=new URL(location.href);u.searchParams.delete('
 </script><script>
 (()=>{
 const $=id=>document.getElementById(id);
-const lockKey='blackshield-risk-lock';
+const lockKey=new URLSearchParams(location.search).get('mini')==='1'?'blackshield-mini-risk-lock':'blackshield-risk-lock';
 let locked=false;
 try{locked=localStorage.getItem(lockKey)==='1';}catch(e){}
 function applyLock(){
@@ -275,7 +276,7 @@ function applyLock(){
 }
 applyLock();
 $('riskLock').onclick=()=>{locked=!locked;try{localStorage.setItem(lockKey,locked?'1':'0');}catch(e){}applyLock();};
-window.addEventListener('storage',e=>{if(e.key===lockKey){locked=e.newValue==='1';if(locked){try{const d=JSON.parse(localStorage.getItem('capitalguard_settings_v6'));if(d&&d.risk!==undefined){$('risk').value=d.risk;$('risk').dispatchEvent(new Event('input'));}}catch(e){}}applyLock();}});
+window.addEventListener('storage',e=>{if(e.key===lockKey){locked=e.newValue==='1';if(locked){try{const d=JSON.parse(localStorage.getItem(new URLSearchParams(location.search).get('mini')==='1'?'blackshield-mini-settings':'capitalguard_settings_v6'));if(d&&d.risk!==undefined){$('risk').value=d.risk;$('risk').dispatchEvent(new Event('input'));}}catch(e){}}applyLock();}});
 let blocked=false;
 $('exportReport').onclick=()=>{
  if(blocked)return;
@@ -286,7 +287,7 @@ $('exportReport').onclick=()=>{
  const c=canvas.getContext('2d');if(!c){alert('Image export is not supported in this browser.');return;}
  c.fillStyle='#091322';c.fillRect(0,0,canvas.width,canvas.height);
  c.font='bold 38px Arial';c.fillStyle='#65e3ad';c.fillText('BLACK SHIELD',40,65);
- c.font='20px Arial';c.fillStyle='#b4c5dc';c.fillText('Risk calculation report | V5.0.9',40,100);
+ c.font='20px Arial';c.fillStyle='#b4c5dc';c.fillText('Risk calculation report | V5.0.10',40,100);
  c.fillText(new Date().toLocaleString(),40,132);
  c.font='bold 25px Arial';c.fillStyle='#fff';c.fillText('Symbol: '+symbol.slice(0,40),40,180,920);
  c.font='22px Arial';c.fillText('Account: $'+$('balance').value+'   |   Risk: '+$('risk').value+'%',40,218,920);
@@ -296,7 +297,7 @@ $('exportReport').onclick=()=>{
  const foot=320+rows.length*43;c.fillStyle='#91a8c5';c.font='17px Arial';c.fillText('Estimates only. Verify broker specifications and USD conversion.',40,foot);c.fillText('Spread, commissions, slippage and swap are excluded.',40,foot+26);
  canvas.toBlob(blob=>{if(!blob){alert('Image export failed.');return;}const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='BLACK-SHIELD-'+symbol.replace(/[^a-z0-9_-]/gi,'_')+'-report.png';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),10000);},'image/png');
 };
-const version='5.0.9';
+const version='5.0.10';
 function older(a,b){const x=a.split('.').map(Number),y=b.split('.').map(Number);for(let i=0;i<3;i++){if(x[i]!==y[i])return x[i]<y[i];}return false;}
 function enforce(on,message){
  blocked=on;$('emergencyNotice').hidden=!on;$('emergencyText').textContent=message||'';
