@@ -1,5 +1,5 @@
 // Change VERSION for every release, including HTML-only changes.
-const VERSION='5.0.3';
+const VERSION='5.0.4';
 const PREFIX='black-shield-'+self.registration.scope+'-';
 const CACHE=PREFIX+VERSION;
 const HOME=new URL('./index.html',self.registration.scope).href;
