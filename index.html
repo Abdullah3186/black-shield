@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>BLACK SHIELD — Hybrid V5.0.6</title>
+<title>BLACK SHIELD — Hybrid V5.0.7</title>
 <style>
 *{box-sizing:border-box}
 body{margin:0;background:#091322;color:#eaf2ff;font-family:Arial,system-ui,sans-serif}
@@ -40,9 +40,9 @@ button:hover{background:#284a72}
 <body>
 <main class="wrap">
 <h1>BLACK <span style="color:#65e3ad">SHIELD</span></h1>
-<p class="sub">Risk & Lot Size Calculator · Hybrid V5.0.6 · Online + Offline</p>
+<p class="sub">Risk & Lot Size Calculator · Hybrid V5.0.7 · Online + Offline</p>
 
-<aside id="announcement" class="note" hidden role="status" style="margin-bottom:14px"><strong id="announcementTitle"></strong><p id="announcementText" style="white-space:pre-wrap"></p><button id="dismissAnnouncement" type="button">Dismiss</button></aside><div class="actions" style="margin-bottom:14px"><button id="installApp" type="button">Install desktop app</button><button id="miniApp" type="button">Floating calculator</button><button id="fullApp" type="button" hidden>Full dashboard</button></div><section class="panel">
+<aside id="announcement" class="note" hidden role="status" style="margin-bottom:14px"><strong id="announcementTitle"></strong><p id="announcementText" style="white-space:pre-wrap"></p><button id="dismissAnnouncement" type="button">Dismiss</button></aside><div class="actions" style="margin-bottom:14px"><button id="installApp" type="button">Install desktop app</button><button id="miniApp" type="button">Floating calculator</button><button id="fullApp" type="button" hidden>Full dashboard</button></div><aside id="emergencyNotice" class="note" hidden style="border-color:#ff7777" role="alert"><strong>CRITICAL UPDATE REQUIRED</strong><p id="emergencyText"></p><button id="emergencyUpdate" type="button">Check for emergency update</button></aside><section class="panel">
   <div class="grid">
     <div><label for="balance">Account Balance ($)</label><input id="balance" type="number" min="0" step="any" value="500"></div>
     <div><label for="risk">Risk (%)</label><input id="risk" type="number" min="0" max="100" step="any" value="3"></div>
@@ -59,7 +59,7 @@ button:hover{background:#284a72}
   <div class="summary"><span>Risk amount</span><b id="budget">$15.00</b></div>
   <div class="note" id="activeSettings" aria-live="polite">Active settings loading…</div>
   <div class="actions"><button id="checkUpdate">Check for updates</button><span id="updateStatus" class="pill" role="status">Offline cache not yet verified</span>
-    <button id="reset">Reset saved settings</button>
+    <button id="riskLock" type="button" aria-pressed="false">Lock risk %</button><button id="exportReport" type="button">Export PNG report</button><button id="reset">Reset saved settings</button>
   </div>
   <div class="note" id="profileNote"></div>
 </section>
@@ -159,6 +159,7 @@ fields.forEach(id=>{
   $(id).addEventListener('change',()=>{if(id==='symbol')applyProfile(false);else update();});
 });
 $('reset').addEventListener('click',()=>{
+  if($('risk').readOnly)return;
   try{localStorage.removeItem('capitalguard_settings_v6');localStorage.removeItem('capitalguard_settings_v5');localStorage.removeItem('capitalguard_settings_v3');localStorage.removeItem('capitalguard_settings_v2');localStorage.removeItem('capitalguard_pips_v1');}catch(e){}
   $('balance').value=500;$('risk').value=3;$('symbol').value='NAS100';
   $('minlot').value=0.10;$('step').value=0.01;activeSymbol='';
@@ -181,13 +182,13 @@ function filterSymbols(){
 search.addEventListener('input',filterSymbols);
 search.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();const q=search.value.trim().toUpperCase();const m=allSymbols.filter(s=>(s+' '+(aliases[s]||'')+' '+(categories[s]||'')).toUpperCase().includes(q));if(m.length===1){select.value=m[0];select.dispatchEvent(new Event('change'));}}});
 select.addEventListener('change',()=>{search.value='';filterSymbols();});
-$('reset').addEventListener('click',()=>{search.value='';select.replaceChildren(...allSymbols.map(s=>new Option(labels(s),s)));select.value='NAS100';select.size=1;});
+$('reset').addEventListener('click',()=>{if($('risk').readOnly)return;search.value='';select.replaceChildren(...allSymbols.map(s=>new Option(labels(s),s)));select.value='NAS100';select.size=1;});
 })();
 </script>
 <script>
 (()=>{
 const status=document.getElementById('updateStatus'), button=document.getElementById('checkUpdate');
-const VERSION='5.0.6'; let reg, busy=false, reloading=false;
+const VERSION='5.0.7'; let reg, busy=false, reloading=false;
 const local=location.protocol==='file:', supported='serviceWorker' in navigator && !local && window.isSecureContext;
 function show(message){status.textContent=message;}
 async function check(manual=false){
@@ -234,6 +235,60 @@ const compact=new URLSearchParams(location.search).get('mini')==='1';
 if(compact){document.body.classList.add('compact');$('fullApp').hidden=false;$('miniApp').hidden=true;$('installApp').hidden=true;}
 $('miniApp').onclick=()=>{const u=new URL(location.href);u.searchParams.set('mini','1');const win=window.open(u.href,'blackShieldMini','popup,width=460,height=690,resizable=yes,scrollbars=yes');if(!win){location.href=u.href;}else{win.focus();}};
 $('fullApp').onclick=()=>{const u=new URL(location.href);u.searchParams.delete('mini');location.href=u.href;};
+})();
+</script><script>
+(()=>{
+const $=id=>document.getElementById(id);
+const lockKey='blackshield-risk-lock';
+let locked=false;
+try{locked=localStorage.getItem(lockKey)==='1';}catch(e){}
+function applyLock(){
+ $('risk').readOnly=locked;
+ $('riskLock').textContent=locked?'Unlock risk %':'Lock risk %';
+ $('riskLock').setAttribute('aria-pressed',String(locked));
+ $('reset').disabled=locked;
+}
+applyLock();
+$('riskLock').onclick=()=>{locked=!locked;try{localStorage.setItem(lockKey,locked?'1':'0');}catch(e){}applyLock();};
+window.addEventListener('storage',e=>{if(e.key===lockKey){locked=e.newValue==='1';if(locked){try{const d=JSON.parse(localStorage.getItem('capitalguard_settings_v6'));if(d&&d.risk!==undefined){$('risk').value=d.risk;$('risk').dispatchEvent(new Event('input'));}}catch(e){}}applyLock();}});
+let blocked=false;
+$('exportReport').onclick=()=>{
+ if(blocked)return;
+ const rows=Array.from($('result').querySelectorAll('tr'),tr=>Array.from(tr.cells,c=>c.textContent.trim()));
+ if(rows.length<2){alert('Enter valid specifications before exporting.');return;}
+ const symbol=$('symbol').value==='CUSTOM'?$('customSymbol').value:$('symbol').value;
+ const canvas=document.createElement('canvas');canvas.width=1000;canvas.height=410+rows.length*43;
+ const c=canvas.getContext('2d');if(!c){alert('Image export is not supported in this browser.');return;}
+ c.fillStyle='#091322';c.fillRect(0,0,canvas.width,canvas.height);
+ c.font='bold 38px Arial';c.fillStyle='#65e3ad';c.fillText('BLACK SHIELD',40,65);
+ c.font='20px Arial';c.fillStyle='#b4c5dc';c.fillText('Risk calculation report | V5.0.7',40,100);
+ c.fillText(new Date().toLocaleString(),40,132);
+ c.font='bold 25px Arial';c.fillStyle='#fff';c.fillText('Symbol: '+symbol.slice(0,40),40,180,920);
+ c.font='22px Arial';c.fillText('Account: 
+</html>+$('balance').value+'   |   Risk: '+$('risk').value+'%',40,218,920);
+ c.fillStyle='#65e3ad';c.fillText('Risk budget: '+$('budget').textContent,40,254);
+ c.fillStyle='#b4c5dc';c.font='18px Arial';c.fillText('Contract: '+$('contract').value+' | Unit: '+$('pip').value+' | Min: '+$('minlot').value+' | Step: '+$('step').value,40,286,920);
+ rows.forEach((row,i)=>{const y=308+i*43;c.fillStyle=i===0?'#243b54':i%2?'#111f34':'#14263b';c.fillRect(40,y,920,42);c.font=(i===0?'bold ':'')+'21px Arial';row.forEach((v,j)=>{c.fillStyle=v==='NO TRADE'?'#ff9b9b':j===1&&i>0?'#65e3ad':'#eaf2ff';c.fillText(v,[55,365,665][j],y+28,285);});});
+ const foot=320+rows.length*43;c.fillStyle='#91a8c5';c.font='17px Arial';c.fillText('Estimates only. Verify broker specifications and USD conversion.',40,foot);c.fillText('Spread, commissions, slippage and swap are excluded.',40,foot+26);
+ canvas.toBlob(blob=>{if(!blob){alert('Image export failed.');return;}const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='BLACK-SHIELD-'+symbol.replace(/[^a-z0-9_-]/gi,'_')+'-report.png';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),10000);},'image/png');
+};
+const version='5.0.7';
+function older(a,b){const x=a.split('.').map(Number),y=b.split('.').map(Number);for(let i=0;i<3;i++){if(x[i]!==y[i])return x[i]<y[i];}return false;}
+function enforce(on,message){
+ blocked=on;$('emergencyNotice').hidden=!on;$('emergencyText').textContent=message||'';
+ document.querySelectorAll('main .panel').forEach(p=>{p.hidden=on;});
+ $('miniApp').disabled=on;$('fullApp').disabled=on;$('installApp').disabled=on;
+}
+let saved=null;
+try{saved=JSON.parse(localStorage.getItem('blackshield-emergency-policy'));}catch(e){}
+function accept(p){if(!p||typeof p.enabled!=='boolean'||typeof p.minimumVersion!=='string'||!/^\d+\.\d+\.\d+$/.test(p.minimumVersion))return;enforce(p.enabled&&older(version,p.minimumVersion),String(p.message||'A critical update is required.').slice(0,1000));}
+accept(saved);
+async function policy(){
+ if(location.protocol==='file:'||!navigator.onLine)return;
+ try{const res=await fetch('./emergency.json?t='+Date.now(),{cache:'no-store'});if(!res.ok)return;const p=await res.json();if(typeof p.enabled!=='boolean'||typeof p.minimumVersion!=='string'||!/^\d+\.\d+\.\d+$/.test(p.minimumVersion))return;try{localStorage.setItem('blackshield-emergency-policy',JSON.stringify(p));}catch(e){}accept(p);}catch(e){}
+}
+$('emergencyUpdate').onclick=()=>{$('checkUpdate').click();policy();};
+policy();setInterval(policy,60000);window.addEventListener('online',policy);document.addEventListener('visibilitychange',()=>{if(!document.hidden)policy();});
 })();
 </script></body>
 </html>
