@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>BLACK SHIELD — Hybrid V5.0.3</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#091322;color:#eaf2ff;font-family:Arial,system-ui,sans-serif}
+.wrap{max-width:960px;margin:auto;padding:26px 16px}
+h1{font-size:26px;margin:0;color:#f5faff}
+.sub{color:#90a5c3;font-size:13px;margin:7px 0 24px}
+.panel{background:#111f34;border:1px solid #263b56;border-radius:16px;padding:22px;margin-bottom:17px}
+.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:15px}
+label{display:block;font-size:13px;color:#a7bdd9;margin-bottom:7px}
+input,select{width:100%;background:#091729;color:white;border:1px solid #3a5373;border-radius:9px;padding:12px;font-size:16px;outline:none}
+input:focus,select:focus{border-color:#60a5fa}
+.summary{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:20px;background:#0b1a2b;padding:16px;border-radius:12px}
+.summary b{font-size:24px;color:#65e3ad}
+.summary span{color:#b4c5dc}
+.head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px}
+h2{margin:0;font-size:19px}
+table{border-collapse:collapse;width:100%;font-size:15px}
+th{text-align:left;color:#91aacc;font-size:12px;text-transform:uppercase;letter-spacing:.5px;background:#0b1a2c}
+td,th{padding:12px;border-bottom:1px solid #273a51}
+td:nth-child(2){color:#6ee7b7;font-weight:700}
+td:last-child,th:last-child{text-align:right}
+.bad{color:#ff9b9b!important}
+.hint{color:#91a8c5;font-size:12px;line-height:1.6;margin-top:15px}
+.empty{padding:22px;color:#ffb3b3}
+.pill{color:#a8bfdc;font-size:12px}
+button{background:#1c3655;color:white;border:1px solid #395778;border-radius:8px;padding:9px 12px;cursor:pointer}
+button:hover{background:#284a72}
+.note{background:#192d47;border-left:3px solid #60a5fa;padding:12px;border-radius:7px;color:#c6d8ee;font-size:13px;line-height:1.55;margin-top:14px}
+.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:14px}
+@media(max-width:680px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.panel{padding:15px}.wrap{padding:16px 10px}.summary b{font-size:20px}}
+@media(max-width:410px){.grid{grid-template-columns:1fr 1fr}input,select{font-size:14px}}
+</style>
+</head>
+<body>
+<main class="wrap">
+<h1>BLACK <span style="color:#65e3ad">SHIELD</span></h1>
+<p class="sub">Risk & Lot Size Calculator · Hybrid V5.0.3 · Online + Offline</p>
+
+<section class="panel">
+  <div class="grid">
+    <div><label for="balance">Account Balance ($)</label><input id="balance" type="number" min="0" step="any" value="500"></div>
+    <div><label for="risk">Risk (%)</label><input id="risk" type="number" min="0" max="100" step="any" value="3"></div>
+    <div><label for="symbol">Symbol</label>
+      <select id="symbol">
+        <option>NAS100</option><option>XAUUSD</option><option>BTCUSD</option>
+        <option>EURUSD</option><option>GBPUSD</option><option>US30</option>
+      </select>
+    </div>
+    <div><label for="contract">Contract size (units per 1 lot)</label><input id="contract" type="number" min="0" step="any" value="1"></div>
+    <div><label for="pip">Price size of 1 table unit</label><input id="pip" type="number" min="0" step="any" value="1"></div>
+    <div><label for="minlot">Minimum lot</label><input id="minlot" type="number" min="0" step="any" value="0.10"></div>
+    <div><label for="step">Lot step</label><input id="step" type="number" min="0" step="any" value="0.01"></div>
+  </div>
+  <div class="summary"><span>Risk amount</span><b id="budget">$15.00</b></div>
+  <div class="note" id="activeSettings" aria-live="polite">Active settings loading…</div>
+  <div class="actions"><button id="checkUpdate">Check for updates</button><span id="updateStatus" class="pill" role="status">Offline cache not yet verified</span>
+    <button id="reset">Reset saved settings</button>
+  </div>
+  <div class="note" id="profileNote"></div>
+</section>
+
+<section class="panel">
+  <div class="head"><h2>Lot Size Table</h2><span class="pill" id="unitPill">10–200 Handles</span></div>
+  <div id="result"></div>
+  <p class="hint">
+    Calculation (USD account assumption): risk amount ÷ (stop distance in price × contract size). The table unit's price size converts handles/pips/points into price distance.
+    Lot sizes are rounded DOWN using your minimum lot and lot step so estimated risk does not exceed the selected budget.
+    Set your own minimum lot, lot step, contract size and price size.
+    Spread, commission, slippage, currency conversion and swap are not included.
+  </p>
+</section>
+</main>
+<script>
+(function(){
+'use strict';
+const $ = id => document.getElementById(id);
+const fields = ['balance','risk','symbol','contract','pip','minlot','step'];
+const profiles = {
+  NAS100:{contract:1,unitSize:1,unit:'Handles',note:'Default estimate only: 1 contract unit and 1.0 price point per handle.'},
+  US30:{contract:1,unitSize:1,unit:'Handles',note:'Default estimate only: 1 contract unit and 1.0 price point per handle.'},
+  XAUUSD:{contract:100,unitSize:0.01,unit:'Pips',note:'Default estimate: 1 lot = 100 oz and 1 pip = $0.01 price movement.'},
+  EURUSD:{contract:100000,unitSize:0.0001,unit:'Pips',note:'Default estimate: 1 lot = 100,000 units and 1 pip = 0.0001.'},
+  GBPUSD:{contract:100000,unitSize:0.0001,unit:'Pips',note:'Default estimate: 1 lot = 100,000 units and 1 pip = 0.0001.'},
+  BTCUSD:{contract:1,unitSize:1,unit:'Price Points',note:'Default estimate only: 1 contract unit and 1.0 price point.'}
+};
+let activeSymbol = '';
+function symbolProfile(){
+  const s=$('symbol').value.toUpperCase();
+  return profiles[s] || {contract:1,unitSize:1,unit:'Price Points',note:'Custom symbol: enter the correct contract size and price size for one table unit.'};
+}
+function money(v){return '$'+v.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});}
+function fmt(v){return Number(v.toFixed(8)).toLocaleString('en-US',{maximumFractionDigits:8});}
+function applyProfile(force){
+  const s=$('symbol').value.toUpperCase(), p=symbolProfile();
+  if(force || s!==activeSymbol){
+    $('contract').value=p.contract;
+    $('pip').value=p.unitSize;
+    activeSymbol=s;
+  }
+  $('unitPill').textContent='10–200 '+p.unit;
+  $('profileNote').textContent=p.note+' These are starting assumptions, not guaranteed broker specifications. You can edit both values.';
+  update();
+}
+function readNumber(id){const raw=$(id).value.trim();return raw===''?NaN:Number(raw);}
+function update(){
+  const b=readNumber('balance'), r=readNumber('risk');
+  const c=readNumber('contract'), unitSize=readNumber('pip');
+  const min=readNumber('minlot'), step=readNumber('step');
+  const p=symbolProfile(), valid=[b,r,c,unitSize,min,step].every(Number.isFinite) &&
+    b>0 && r>0 && r<=100 && c>0 && unitSize>0 && min>0 && step>0;
+  const budget=valid?b*(r/100):0;
+  $('budget').textContent=valid?money(budget):'—';
+  $('activeSettings').textContent='ACTIVE: Minimum Lot = '+$('minlot').value+' | Lot Step = '+$('step').value+' | Contract Size = '+$('contract').value+' | Unit Size = '+$('pip').value;
+  const target=$('result');
+  if(!valid){
+    target.innerHTML='<div class="empty">Enter valid positive numbers. Risk must be greater than 0% and no more than 100%.</div>';
+    save(); return;
+  }
+  let html='<table><thead><tr><th>'+p.unit+'</th><th>Lot size</th><th>Estimated risk</th></tr></thead><tbody>';
+  for(let distance=10;distance<=200;distance+=10){
+    const priceDistance=distance*unitSize;
+    const riskPerLot=priceDistance*c;
+    const rawLot=budget/riskPerLot;
+    // Valid volumes are minlot + n * step, where n is a nonnegative integer.
+    const n=Math.floor((rawLot-min)/step+1e-9);
+    const cleanLot=n>=0 ? Number((min+n*step).toPrecision(12)) : 0;
+    const tradable=Number.isFinite(cleanLot) && Number.isFinite(riskPerLot) && n>=0 && cleanLot>=min && cleanLot*riskPerLot<=budget;
+    const finalLot=tradable?cleanLot:0;
+    const loss=finalLot*riskPerLot;
+    html+='<tr><td>'+distance+'</td><td class="'+(!tradable?'bad':'')+'">'+(tradable?fmt(finalLot):'NO TRADE')+'</td><td>'+(tradable?money(loss):'—')+'</td></tr>';
+  }
+  target.innerHTML=html+'</tbody></table>';
+  save();
+}
+function save(){
+  try{const data={};fields.forEach(id=>data[id]=$(id).value);localStorage.setItem('capitalguard_settings_v6',JSON.stringify(data));}catch(e){}
+}
+function load(){
+  let loaded=false;
+  try{
+    const raw=localStorage.getItem('capitalguard_settings_v6');
+    if(raw){const d=JSON.parse(raw);loaded=true;fields.forEach(id=>{if(d[id]!==undefined)$(id).value=d[id];});}
+  }catch(e){}
+  activeSymbol=$('symbol').value.toUpperCase();
+  // Only use the profile defaults for first-time users; preserve loaded/manual contract settings.
+  if(!loaded) applyProfile(true);
+  else {const p=symbolProfile();$('unitPill').textContent='10–200 '+p.unit;$('profileNote').textContent=p.note+' These are starting assumptions, not guaranteed broker specifications. You can edit both values.';update();}
+}
+fields.forEach(id=>{
+  $(id).addEventListener('input',()=>{if(id==='symbol')applyProfile(false);else update();});
+  $(id).addEventListener('change',()=>{if(id==='symbol')applyProfile(false);else update();});
+});
+$('reset').addEventListener('click',()=>{
+  try{localStorage.removeItem('capitalguard_settings_v6');localStorage.removeItem('capitalguard_settings_v5');localStorage.removeItem('capitalguard_settings_v3');localStorage.removeItem('capitalguard_settings_v2');localStorage.removeItem('capitalguard_pips_v1');}catch(e){}
+  $('balance').value=500;$('risk').value=3;$('symbol').value='NAS100';
+  $('minlot').value=0.10;$('step').value=0.01;activeSymbol='';
+  applyProfile(true);
+});
+load();
+})();
+</script>
+<script>
+(()=>{
+const status=document.getElementById('updateStatus'), button=document.getElementById('checkUpdate');
+const VERSION='5.0.3'; let reg, busy=false, reloading=false;
+const local=location.protocol==='file:', supported='serviceWorker' in navigator && !local && window.isSecureContext;
+function show(message){status.textContent=message;}
+async function check(manual=false){
+ const report=message=>{show(message);if(manual)window.alert("BLACK SHIELD V"+VERSION+"\n\n"+message);};
+ if(!supported){report('This is a local HTML copy. Automatic updates require your published HTTPS website.');return;}
+ if(!reg){report('Update service not ready. Reload the hosted page and try again.');return;}
+ if(busy){if(manual)window.alert('An update check is already running.');return;} if(!navigator.onLine){report('Offline · using V'+VERSION);return;}
+ busy=true;show('Checking for updates…');
+ try{await reg.update();report(reg.installing||reg.waiting?'Update found · installing…':'Update check complete · V'+VERSION);}
+ catch(e){report('Update check failed · using V'+VERSION+' · '+e.message);}
+ finally{busy=false;}
+}
+button.addEventListener('click',()=>check(true));
+if(!supported){show('Local copy · updates require hosted HTTPS link');return;}
+let controlled=!!navigator.serviceWorker.controller;
+navigator.serviceWorker.addEventListener('controllerchange',()=>{if(controlled&&!reloading){reloading=true;location.reload();}controlled=true;});
+window.addEventListener('online',()=>check());document.addEventListener('visibilitychange',()=>{if(!document.hidden)check();});
+navigator.serviceWorker.register('./sw.js',{updateViaCache:'none'}).then(r=>{reg=r;return navigator.serviceWorker.ready;}).then(()=>{show('Offline cache ready · V'+VERSION);check();setInterval(check,60000);}).catch(e=>show('Update service setup failed: '+e.message));
+})();
+</script></body>
+</html>
