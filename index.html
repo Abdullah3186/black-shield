@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>BLACK SHIELD — Hybrid V5.0.4</title>
+<title>BLACK SHIELD — Hybrid V5.0.5</title>
 <style>
 *{box-sizing:border-box}
 body{margin:0;background:#091322;color:#eaf2ff;font-family:Arial,system-ui,sans-serif}
@@ -40,7 +40,7 @@ button:hover{background:#284a72}
 <body>
 <main class="wrap">
 <h1>BLACK <span style="color:#65e3ad">SHIELD</span></h1>
-<p class="sub">Risk & Lot Size Calculator · Hybrid V5.0.4 · Online + Offline</p>
+<p class="sub">Risk & Lot Size Calculator · Hybrid V5.0.5 · Online + Offline</p>
 
 <section class="panel">
   <div class="grid">
@@ -50,8 +50,7 @@ button:hover{background:#284a72}
       <input id="symbolSearch" type="search" placeholder="Search symbol..." aria-label="Search symbols" autocomplete="off" style="margin-bottom:7px"><select id="symbol">
         <option>NAS100</option><option>XAUUSD</option><option>BTCUSD</option>
         <option>EURUSD</option><option>GBPUSD</option><option>US30</option>
-      </select>
-    </div>
+      <option value="USDJPY">USDJPY — Forex</option><option value="USDCHF">USDCHF — Forex</option><option value="USDCAD">USDCAD — Forex</option><option value="AUDUSD">AUDUSD — Forex</option><option value="NZDUSD">NZDUSD — Forex</option><option value="EURGBP">EURGBP — Forex</option><option value="EURJPY">EURJPY — Forex</option><option value="EURCHF">EURCHF — Forex</option><option value="EURCAD">EURCAD — Forex</option><option value="EURAUD">EURAUD — Forex</option><option value="EURNZD">EURNZD — Forex</option><option value="GBPJPY">GBPJPY — Forex</option><option value="GBPCHF">GBPCHF — Forex</option><option value="GBPCAD">GBPCAD — Forex</option><option value="GBPAUD">GBPAUD — Forex</option><option value="GBPNZD">GBPNZD — Forex</option><option value="AUDJPY">AUDJPY — Forex</option><option value="AUDCAD">AUDCAD — Forex</option><option value="AUDCHF">AUDCHF — Forex</option><option value="AUDNZD">AUDNZD — Forex</option><option value="NZDJPY">NZDJPY — Forex</option><option value="NZDCAD">NZDCAD — Forex</option><option value="NZDCHF">NZDCHF — Forex</option><option value="CADJPY">CADJPY — Forex</option><option value="CADCHF">CADCHF — Forex</option><option value="CHFJPY">CHFJPY — Forex</option><option value="USDTRY">USDTRY — Forex</option><option value="USDZAR">USDZAR — Forex</option><option value="USDMXN">USDMXN — Forex</option><option value="USDHKD">USDHKD — Forex</option><option value="USDSGD">USDSGD — Forex</option><option value="USDCNH">USDCNH — Forex</option><option value="USDINR">USDINR — Forex</option><option value="USDSEK">USDSEK — Forex</option><option value="USDNOK">USDNOK — Forex</option><option value="EURTRY">EURTRY — Forex</option><option value="EURZAR">EURZAR — Forex</option><option value="EURSEK">EURSEK — Forex</option><option value="EURNOK">EURNOK — Forex</option><option value="EURPLN">EURPLN — Forex</option><option value="USDPLN">USDPLN — Forex</option><option value="USDTHB">USDTHB — Forex</option><option value="USDILS">USDILS — Forex</option><option value="USDDKK">USDDKK — Forex</option><option value="EURDKK">EURDKK — Forex</option><option value="ETHUSD">ETHUSD — Crypto</option><option value="SOLUSD">SOLUSD — Crypto</option><option value="XRPUSD">XRPUSD — Crypto</option><option value="BNBUSD">BNBUSD — Crypto</option><option value="ADAUSD">ADAUSD — Crypto</option><option value="DOGEUSD">DOGEUSD — Crypto</option><option value="AVAXUSD">AVAXUSD — Crypto</option><option value="DOTUSD">DOTUSD — Crypto</option><option value="LINKUSD">LINKUSD — Crypto</option><option value="LTCUSD">LTCUSD — Crypto</option><option value="BCHUSD">BCHUSD — Crypto</option><option value="XLMUSD">XLMUSD — Crypto</option><option value="TRXUSD">TRXUSD — Crypto</option><option value="TONUSD">TONUSD — Crypto</option><option value="SUIUSD">SUIUSD — Crypto</option><option value="HBARUSD">HBARUSD — Crypto</option><option value="UNIUSD">UNIUSD — Crypto</option><option value="AAVEUSD">AAVEUSD — Crypto</option><option value="NEARUSD">NEARUSD — Crypto</option><option value="ATOMUSD">ATOMUSD — Crypto</option><option value="ETCUSD">ETCUSD — Crypto</option><option value="FILUSD">FILUSD — Crypto</option><option value="XMRUSD">XMRUSD — Crypto</option><option value="ALGOUSD">ALGOUSD — Crypto</option><option value="APTUSD">APTUSD — Crypto</option><option value="ARBUSD">ARBUSD — Crypto</option><option value="OPUSD">OPUSD — Crypto</option><option value="PEPEUSD">PEPEUSD — Crypto</option><option value="BTCUSDT">BTCUSDT — Crypto</option><option value="ETHUSDT">ETHUSDT — Crypto</option><option value="SOLUSDT">SOLUSDT — Crypto</option><option value="XRPUSDT">XRPUSDT — Crypto</option><option value="BNBUSDT">BNBUSDT — Crypto</option><option value="DOGEUSDT">DOGEUSDT — Crypto</option><option value="ADAUSDT">ADAUSDT — Crypto</option><option value="BTCETH">BTCETH — Crypto</option><option value="ETHBTC">ETHBTC — Crypto</option><option value="AAPL">AAPL — Stocks</option><option value="MSFT">MSFT — Stocks</option><option value="NVDA">NVDA — Stocks</option><option value="AMZN">AMZN — Stocks</option><option value="GOOGL">GOOGL — Stocks</option><option value="GOOG">GOOG — Stocks</option><option value="META">META — Stocks</option><option value="TSLA">TSLA — Stocks</option><option value="AMD">AMD — Stocks</option><option value="AVGO">AVGO — Stocks</option><option value="INTC">INTC — Stocks</option><option value="NFLX">NFLX — Stocks</option><option value="ORCL">ORCL — Stocks</option><option value="CRM">CRM — Stocks</option><option value="ADBE">ADBE — Stocks</option><option value="PLTR">PLTR — Stocks</option><option value="UBER">UBER — Stocks</option><option value="SHOP">SHOP — Stocks</option><option value="COIN">COIN — Stocks</option><option value="MSTR">MSTR — Stocks</option><option value="IBM">IBM — Stocks</option><option value="QCOM">QCOM — Stocks</option><option value="MU">MU — Stocks</option><option value="ARM">ARM — Stocks</option><option value="TSM">TSM — Stocks</option><option value="ASML">ASML — Stocks</option><option value="JPM">JPM — Stocks</option><option value="BAC">BAC — Stocks</option><option value="GS">GS — Stocks</option><option value="MS">MS — Stocks</option><option value="WFC">WFC — Stocks</option><option value="V">V — Stocks</option><option value="MA">MA — Stocks</option><option value="PYPL">PYPL — Stocks</option><option value="C">C — Stocks</option><option value="WMT">WMT — Stocks</option><option value="COST">COST — Stocks</option><option value="TGT">TGT — Stocks</option><option value="KO">KO — Stocks</option><option value="PEP">PEP — Stocks</option><option value="MCD">MCD — Stocks</option><option value="SBUX">SBUX — Stocks</option><option value="NKE">NKE — Stocks</option><option value="DIS">DIS — Stocks</option><option value="XOM">XOM — Stocks</option><option value="CVX">CVX — Stocks</option><option value="SHEL">SHEL — Stocks</option><option value="BP">BP — Stocks</option><option value="LLY">LLY — Stocks</option><option value="UNH">UNH — Stocks</option><option value="JNJ">JNJ — Stocks</option><option value="PFE">PFE — Stocks</option><option value="ABBV">ABBV — Stocks</option><option value="MRK">MRK — Stocks</option><option value="CAT">CAT — Stocks</option><option value="BA">BA — Stocks</option><option value="GE">GE — Stocks</option><option value="F">F — Stocks</option><option value="GM">GM — Stocks</option><option value="RIVN">RIVN — Stocks</option><option value="BABA">BABA — Stocks</option><option value="JD">JD — Stocks</option><option value="BIDU">BIDU — Stocks</option><option value="NIO">NIO — Stocks</option><option value="SONY">SONY — Stocks</option><option value="TM">TM — Stocks</option><option value="SAP">SAP — Stocks</option><option value="HSBC">HSBC — Stocks</option><option value="BHP">BHP — Stocks</option><option value="RIO">RIO — Stocks</option><option value="SPX500">SPX500 — Indices</option><option value="US500">US500 — Indices</option><option value="SP500">SP500 — Indices</option><option value="NASDAQ">NASDAQ — Indices</option><option value="NDX">NDX — Indices</option><option value="DJ30">DJ30 — Indices</option><option value="US2000">US2000 — Indices</option><option value="RUS2000">RUS2000 — Indices</option><option value="GER40">GER40 — Indices</option><option value="DAX40">DAX40 — Indices</option><option value="UK100">UK100 — Indices</option><option value="FTSE100">FTSE100 — Indices</option><option value="FRA40">FRA40 — Indices</option><option value="CAC40">CAC40 — Indices</option><option value="EU50">EU50 — Indices</option><option value="STOXX50">STOXX50 — Indices</option><option value="JP225">JP225 — Indices</option><option value="JPN225">JPN225 — Indices</option><option value="HK50">HK50 — Indices</option><option value="HSI">HSI — Indices</option><option value="AUS200">AUS200 — Indices</option><option value="CHINA50">CHINA50 — Indices</option><option value="CN50">CN50 — Indices</option><option value="INDIA50">INDIA50 — Indices</option><option value="NIFTY50">NIFTY50 — Indices</option><option value="SENSEX">SENSEX — Indices</option><option value="VIX">VIX — Indices</option><option value="XAGUSD">XAGUSD — Commodities</option><option value="XPTUSD">XPTUSD — Commodities</option><option value="XPDUSD">XPDUSD — Commodities</option><option value="USOIL">USOIL — Commodities</option><option value="WTI">WTI — Commodities</option><option value="UKOIL">UKOIL — Commodities</option><option value="BRENT">BRENT — Commodities</option><option value="NATGAS">NATGAS — Commodities</option><option value="XNGUSD">XNGUSD — Commodities</option><option value="COPPER">COPPER — Commodities</option><option value="XCUUSD">XCUUSD — Commodities</option><option value="CORN">CORN — Commodities</option><option value="WHEAT">WHEAT — Commodities</option><option value="SOYBEAN">SOYBEAN — Commodities</option><option value="SUGAR">SUGAR — Commodities</option><option value="COFFEE">COFFEE — Commodities</option><option value="COCOA">COCOA — Commodities</option><option value="COTTON">COTTON — Commodities</option><option value="SPY">SPY — ETFs</option><option value="QQQ">QQQ — ETFs</option><option value="DIA">DIA — ETFs</option><option value="IWM">IWM — ETFs</option><option value="VOO">VOO — ETFs</option><option value="VTI">VTI — ETFs</option><option value="GLD">GLD — ETFs</option><option value="SLV">SLV — ETFs</option><option value="TLT">TLT — ETFs</option><option value="XLF">XLF — ETFs</option><option value="XLK">XLK — ETFs</option><option value="XLE">XLE — ETFs</option><option value="EEM">EEM — ETFs</option><option value="ARKK">ARKK — ETFs</option><option value="SCHD">SCHD — ETFs</option><option value="ES">ES — Futures</option><option value="MES">MES — Futures</option><option value="NQ">NQ — Futures</option><option value="MNQ">MNQ — Futures</option><option value="YM">YM — Futures</option><option value="MYM">MYM — Futures</option><option value="RTY">RTY — Futures</option><option value="M2K">M2K — Futures</option><option value="CL">CL — Futures</option><option value="MCL">MCL — Futures</option><option value="GC">GC — Futures</option><option value="MGC">MGC — Futures</option><option value="SI">SI — Futures</option><option value="NG">NG — Futures</option><option value="ZB">ZB — Futures</option><option value="ZN">ZN — Futures</option><option value="6E">6E — Futures</option><option value="6J">6J — Futures</option><option value="6B">6B — Futures</option><option value="CUSTOM">Custom / Other symbol</option></select><input id="customSymbol" placeholder="Enter broker symbol" maxlength="40" hidden style="margin-top:7px"></div>
     <div><label for="contract">Contract size (units per 1 lot)</label><input id="contract" type="number" min="0" step="any" value="1"></div>
     <div><label for="pip">Price size of 1 table unit</label><input id="pip" type="number" min="0" step="any" value="1"></div>
     <div><label for="minlot">Minimum lot</label><input id="minlot" type="number" min="0" step="any" value="0.10"></div>
@@ -72,7 +71,7 @@ button:hover{background:#284a72}
     Calculation (USD account assumption): risk amount ÷ (stop distance in price × contract size). The table unit's price size converts handles/pips/points into price distance.
     Lot sizes are rounded DOWN using your minimum lot and lot step so estimated risk does not exceed the selected budget.
     Set your own minimum lot, lot step, contract size and price size.
-    Spread, commission, slippage, currency conversion and swap are not included.
+    Only linear USD-quoted instruments are directly supported. Non-USD quote currencies, inverse crypto contracts and instruments requiring currency conversion are not supported by this formula unless you enter a verified USD-equivalent value per price unit. Spread, commission, slippage and swap are not included.
   </p>
 </section>
 </main>
@@ -80,7 +79,7 @@ button:hover{background:#284a72}
 (function(){
 'use strict';
 const $ = id => document.getElementById(id);
-const fields = ['balance','risk','symbol','contract','pip','minlot','step'];
+const fields = ['balance','risk','symbol','contract','pip','minlot','step','customSymbol'];
 const profiles = {
   NAS100:{contract:1,unitSize:1,unit:'Handles',note:'Default estimate only: 1 contract unit and 1.0 price point per handle.'},
   US30:{contract:1,unitSize:1,unit:'Handles',note:'Default estimate only: 1 contract unit and 1.0 price point per handle.'},
@@ -92,7 +91,7 @@ const profiles = {
 let activeSymbol = '';
 function symbolProfile(){
   const s=$('symbol').value.toUpperCase();
-  return profiles[s] || {contract:1,unitSize:1,unit:'Price Points',note:'Custom symbol: enter the correct contract size and price size for one table unit.'};
+  return profiles[s] || {contract:'',unitSize:'',unit:'Price Points',note:'Manual broker specifications required. Enter contract size, unit size, minimum lot and lot step. USD-linear instruments only; non-USD quotes and inverse contracts require conversion not provided here.'};
 }
 function money(v){return '$'+v.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});}
 function fmt(v){return Number(v.toFixed(8)).toLocaleString('en-US',{maximumFractionDigits:8});}
@@ -102,7 +101,9 @@ function applyProfile(force){
     $('contract').value=p.contract;
     $('pip').value=p.unitSize;
     activeSymbol=s;
+    if(!Object.prototype.hasOwnProperty.call(profiles,s)){ $('minlot').value=''; $('step').value=''; }
   }
+  $('customSymbol').hidden=s!=='CUSTOM';
   $('unitPill').textContent='10–200 '+p.unit;
   $('profileNote').textContent=p.note+' These are starting assumptions, not guaranteed broker specifications. You can edit both values.';
   update();
@@ -112,14 +113,14 @@ function update(){
   const b=readNumber('balance'), r=readNumber('risk');
   const c=readNumber('contract'), unitSize=readNumber('pip');
   const min=readNumber('minlot'), step=readNumber('step');
-  const p=symbolProfile(), valid=[b,r,c,unitSize,min,step].every(Number.isFinite) &&
+  const p=symbolProfile(), valid=($('symbol').value!=='CUSTOM'||$('customSymbol').value.trim().length>0) && [b,r,c,unitSize,min,step].every(Number.isFinite) &&
     b>0 && r>0 && r<=100 && c>0 && unitSize>0 && min>0 && step>0;
   const budget=valid?b*(r/100):0;
   $('budget').textContent=valid?money(budget):'—';
   $('activeSettings').textContent='ACTIVE: Minimum Lot = '+$('minlot').value+' | Lot Step = '+$('step').value+' | Contract Size = '+$('contract').value+' | Unit Size = '+$('pip').value;
   const target=$('result');
   if(!valid){
-    target.innerHTML='<div class="empty">Enter valid positive numbers. Risk must be greater than 0% and no more than 100%.</div>';
+    target.innerHTML='<div class="empty">Enter valid broker specifications and positive numbers (including a custom symbol name if selected). Risk must be greater than 0% and no more than 100%.</div>';
     save(); return;
   }
   let html='<table><thead><tr><th>'+p.unit+'</th><th>Lot size</th><th>Estimated risk</th></tr></thead><tbody>';
@@ -148,6 +149,7 @@ function load(){
     if(raw){const d=JSON.parse(raw);loaded=true;fields.forEach(id=>{if(d[id]!==undefined)$(id).value=d[id];});}
   }catch(e){}
   activeSymbol=$('symbol').value.toUpperCase();
+  $('customSymbol').hidden=activeSymbol!=='CUSTOM';
   // Only use the profile defaults for first-time users; preserve loaded/manual contract settings.
   if(!loaded) applyProfile(true);
   else {const p=symbolProfile();$('unitPill').textContent='10–200 '+p.unit;$('profileNote').textContent=p.note+' These are starting assumptions, not guaranteed broker specifications. You can edit both values.';update();}
@@ -164,28 +166,28 @@ $('reset').addEventListener('click',()=>{
 });
 load();
 const search=$('symbolSearch'), select=$('symbol');
-const allSymbols=Array.from(select.options,o=>o.value);
-const aliases={NAS100:'nasdaq us100 ustech',XAUUSD:'gold',BTCUSD:'bitcoin',US30:'dow jones',EURUSD:'euro',GBPUSD:'pound'};
+const allSymbols=Array.from(select.options,o=>o.value); const categories={"USDJPY":"Forex","USDCHF":"Forex","USDCAD":"Forex","AUDUSD":"Forex","NZDUSD":"Forex","EURGBP":"Forex","EURJPY":"Forex","EURCHF":"Forex","EURCAD":"Forex","EURAUD":"Forex","EURNZD":"Forex","GBPJPY":"Forex","GBPCHF":"Forex","GBPCAD":"Forex","GBPAUD":"Forex","GBPNZD":"Forex","AUDJPY":"Forex","AUDCAD":"Forex","AUDCHF":"Forex","AUDNZD":"Forex","NZDJPY":"Forex","NZDCAD":"Forex","NZDCHF":"Forex","CADJPY":"Forex","CADCHF":"Forex","CHFJPY":"Forex","USDTRY":"Forex","USDZAR":"Forex","USDMXN":"Forex","USDHKD":"Forex","USDSGD":"Forex","USDCNH":"Forex","USDINR":"Forex","USDSEK":"Forex","USDNOK":"Forex","EURTRY":"Forex","EURZAR":"Forex","EURSEK":"Forex","EURNOK":"Forex","EURPLN":"Forex","USDPLN":"Forex","USDTHB":"Forex","USDILS":"Forex","USDDKK":"Forex","EURDKK":"Forex","ETHUSD":"Crypto","SOLUSD":"Crypto","XRPUSD":"Crypto","BNBUSD":"Crypto","ADAUSD":"Crypto","DOGEUSD":"Crypto","AVAXUSD":"Crypto","DOTUSD":"Crypto","LINKUSD":"Crypto","LTCUSD":"Crypto","BCHUSD":"Crypto","XLMUSD":"Crypto","TRXUSD":"Crypto","TONUSD":"Crypto","SUIUSD":"Crypto","HBARUSD":"Crypto","UNIUSD":"Crypto","AAVEUSD":"Crypto","NEARUSD":"Crypto","ATOMUSD":"Crypto","ETCUSD":"Crypto","FILUSD":"Crypto","XMRUSD":"Crypto","ALGOUSD":"Crypto","APTUSD":"Crypto","ARBUSD":"Crypto","OPUSD":"Crypto","PEPEUSD":"Crypto","BTCUSDT":"Crypto","ETHUSDT":"Crypto","SOLUSDT":"Crypto","XRPUSDT":"Crypto","BNBUSDT":"Crypto","DOGEUSDT":"Crypto","ADAUSDT":"Crypto","BTCETH":"Crypto","ETHBTC":"Crypto","AAPL":"Stocks","MSFT":"Stocks","NVDA":"Stocks","AMZN":"Stocks","GOOGL":"Stocks","GOOG":"Stocks","META":"Stocks","TSLA":"Stocks","AMD":"Stocks","AVGO":"Stocks","INTC":"Stocks","NFLX":"Stocks","ORCL":"Stocks","CRM":"Stocks","ADBE":"Stocks","PLTR":"Stocks","UBER":"Stocks","SHOP":"Stocks","COIN":"Stocks","MSTR":"Stocks","IBM":"Stocks","QCOM":"Stocks","MU":"Stocks","ARM":"Stocks","TSM":"Stocks","ASML":"Stocks","JPM":"Stocks","BAC":"Stocks","GS":"Stocks","MS":"Stocks","WFC":"Stocks","V":"Stocks","MA":"Stocks","PYPL":"Stocks","C":"Stocks","WMT":"Stocks","COST":"Stocks","TGT":"Stocks","KO":"Stocks","PEP":"Stocks","MCD":"Stocks","SBUX":"Stocks","NKE":"Stocks","DIS":"Stocks","XOM":"Stocks","CVX":"Stocks","SHEL":"Stocks","BP":"Stocks","LLY":"Stocks","UNH":"Stocks","JNJ":"Stocks","PFE":"Stocks","ABBV":"Stocks","MRK":"Stocks","CAT":"Stocks","BA":"Stocks","GE":"Stocks","F":"Stocks","GM":"Stocks","RIVN":"Stocks","BABA":"Stocks","JD":"Stocks","BIDU":"Stocks","NIO":"Stocks","SONY":"Stocks","TM":"Stocks","SAP":"Stocks","HSBC":"Stocks","BHP":"Stocks","RIO":"Stocks","SPX500":"Indices","US500":"Indices","SP500":"Indices","NASDAQ":"Indices","NDX":"Indices","DJ30":"Indices","US2000":"Indices","RUS2000":"Indices","GER40":"Indices","DAX40":"Indices","UK100":"Indices","FTSE100":"Indices","FRA40":"Indices","CAC40":"Indices","EU50":"Indices","STOXX50":"Indices","JP225":"Indices","JPN225":"Indices","HK50":"Indices","HSI":"Indices","AUS200":"Indices","CHINA50":"Indices","CN50":"Indices","INDIA50":"Indices","NIFTY50":"Indices","SENSEX":"Indices","VIX":"Indices","XAGUSD":"Commodities","XPTUSD":"Commodities","XPDUSD":"Commodities","USOIL":"Commodities","WTI":"Commodities","UKOIL":"Commodities","BRENT":"Commodities","NATGAS":"Commodities","XNGUSD":"Commodities","COPPER":"Commodities","XCUUSD":"Commodities","CORN":"Commodities","WHEAT":"Commodities","SOYBEAN":"Commodities","SUGAR":"Commodities","COFFEE":"Commodities","COCOA":"Commodities","COTTON":"Commodities","SPY":"ETFs","QQQ":"ETFs","DIA":"ETFs","IWM":"ETFs","VOO":"ETFs","VTI":"ETFs","GLD":"ETFs","SLV":"ETFs","TLT":"ETFs","XLF":"ETFs","XLK":"ETFs","XLE":"ETFs","EEM":"ETFs","ARKK":"ETFs","SCHD":"ETFs","ES":"Futures","MES":"Futures","NQ":"Futures","MNQ":"Futures","YM":"Futures","MYM":"Futures","RTY":"Futures","M2K":"Futures","CL":"Futures","MCL":"Futures","GC":"Futures","MGC":"Futures","SI":"Futures","NG":"Futures","ZB":"Futures","ZN":"Futures","6E":"Futures","6J":"Futures","6B":"Futures","NAS100":"Indices","US30":"Indices","XAUUSD":"Commodities","BTCUSD":"Crypto","EURUSD":"Forex","GBPUSD":"Forex","CUSTOM":"Other"}; const labels=s=>s==='CUSTOM'?'Custom / Other symbol':s+' — '+(categories[s]||'Other');
+const aliases={NAS100:'nasdaq us100 ustech',XAUUSD:'gold',BTCUSD:'bitcoin',US30:'dow jones',EURUSD:'euro',GBPUSD:'pound',...{"AAPL":"Apple","MSFT":"Microsoft","NVDA":"Nvidia","TSLA":"Tesla","AMZN":"Amazon","GOOGL":"Alphabet Google","GOOG":"Alphabet Google","META":"Facebook Meta","ETHUSD":"Ethereum","SOLUSD":"Solana","XRPUSD":"Ripple","XAGUSD":"Silver","USOIL":"Crude oil WTI","UKOIL":"Brent oil","SPX500":"S&P 500","US500":"S&P 500","GER40":"Germany DAX","JP225":"Nikkei","NQ":"Nasdaq futures","MNQ":"Micro Nasdaq futures","ES":"S&P futures"}};
 function filterSymbols(){
  const q=search.value.trim().toUpperCase(), current=select.value;
- const matches=allSymbols.filter(s=>(s+' '+(aliases[s]||'')).toUpperCase().includes(q));
+ const matches=allSymbols.filter(s=>(s+' '+(aliases[s]||'')+' '+(categories[s]||'')).toUpperCase().includes(q));
  select.replaceChildren();
  if(!matches.includes(current)&&current){const o=new Option(current+' (current)',current);select.add(o);}
- matches.forEach(s=>select.add(new Option(s,s)));
+ matches.forEach(s=>select.add(new Option(labels(s),s)));
  select.value=current;
  select.size=q?Math.min(6,Math.max(2,select.options.length)):1;
  search.setAttribute('aria-description',matches.length+' matching symbols');
 }
 search.addEventListener('input',filterSymbols);
-search.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();const q=search.value.trim().toUpperCase();const m=allSymbols.filter(s=>(s+' '+(aliases[s]||'')).toUpperCase().includes(q));if(m.length===1){select.value=m[0];select.dispatchEvent(new Event('change'));}}});
+search.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();const q=search.value.trim().toUpperCase();const m=allSymbols.filter(s=>(s+' '+(aliases[s]||'')+' '+(categories[s]||'')).toUpperCase().includes(q));if(m.length===1){select.value=m[0];select.dispatchEvent(new Event('change'));}}});
 select.addEventListener('change',()=>{search.value='';filterSymbols();});
-$('reset').addEventListener('click',()=>{search.value='';select.replaceChildren(...allSymbols.map(s=>new Option(s,s)));select.value='NAS100';select.size=1;});
+$('reset').addEventListener('click',()=>{search.value='';select.replaceChildren(...allSymbols.map(s=>new Option(labels(s),s)));select.value='NAS100';select.size=1;});
 })();
 </script>
 <script>
 (()=>{
 const status=document.getElementById('updateStatus'), button=document.getElementById('checkUpdate');
-const VERSION='5.0.4'; let reg, busy=false, reloading=false;
+const VERSION='5.0.5'; let reg, busy=false, reloading=false;
 const local=location.protocol==='file:', supported='serviceWorker' in navigator && !local && window.isSecureContext;
 function show(message){status.textContent=message;}
 async function check(manual=false){
